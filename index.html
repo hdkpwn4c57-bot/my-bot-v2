@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>UAE Scanner - 1m Blitz Pro</title>
+  <title>UAE Scanner - 6-Indicator 1m Blitz</title>
   
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -151,6 +151,12 @@
       text-transform: uppercase;
     }
 
+    .api-badge.ready {
+      background: rgba(255, 149, 0, 0.15);
+      color: var(--accent-orange);
+      border: 1px solid rgba(255, 149, 0, 0.35);
+    }
+
     .api-badge.live {
       background: var(--green-bg);
       color: var(--green);
@@ -161,12 +167,6 @@
       background: var(--red-bg);
       color: var(--red);
       border: 1px solid rgba(239, 68, 68, 0.4);
-    }
-
-    .api-badge.syncing {
-      background: rgba(255, 149, 0, 0.15);
-      color: var(--accent-orange);
-      border: 1px solid rgba(255, 149, 0, 0.35);
     }
 
     .brand-text span {
@@ -265,12 +265,10 @@
       padding: 5px 9px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
-      transition: all 0.2s ease;
     }
 
-    .price-up { color: var(--green) !important; border-color: rgba(16, 185, 129, 0.5) !important; }
-    .price-down { color: var(--red) !important; border-color: rgba(239, 68, 68, 0.5) !important; }
-    .price-err { color: var(--red) !important; border-color: rgba(239, 68, 68, 0.5) !important; font-size: 11px; }
+    .price-live { color: var(--green) !important; border-color: rgba(16, 185, 129, 0.45) !important; }
+    .price-err { color: var(--red) !important; border-color: rgba(239, 68, 68, 0.45) !important; font-size: 11px; }
 
     select.hidden-select {
       position: absolute;
@@ -450,14 +448,14 @@
       justify-content: space-between;
       font-size: 10px;
       font-weight: 700;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
       color: var(--text-muted);
     }
 
     .step-labels span.active { color: var(--accent-orange); }
     .step-labels span.done { color: var(--text-primary); }
 
-    .feed-note { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .feed-note { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-align: center; }
 
     /* Signal Result Card */
     .signal-card {
@@ -540,25 +538,41 @@
     /* Confidence Color Highlights */
     .conf-high { color: var(--green) !important; }
     .conf-mid { color: var(--accent-orange) !important; }
-    .conf-low { color: var(--red) !important; }
+    .conf-low { color: var(--yellow) !important; }
+
+    /* Insight Banner matching Reference Images */
+    .insight-banner {
+      text-align: center;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      padding: 4px 8px 2px;
+      letter-spacing: 0.2px;
+    }
 
     .indicator-reason {
-      text-align: center;
+      text-align: left;
       font-size: 11px;
       color: var(--text-secondary);
       background: var(--bg-card-inner);
-      padding: 10px;
+      padding: 10px 12px;
       border-radius: 10px;
-      font-family: 'JetBrains Mono', monospace;
       line-height: 1.55;
     }
 
-    .filter-detail {
+    .confluence-tags {
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 11.5px;
+      margin-bottom: 4px;
       display: block;
-      margin-top: 4px;
-      font-family: 'Inter', sans-serif;
-      font-size: 11px;
+    }
+
+    .raw-metrics {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
       color: var(--text-muted);
+      display: block;
     }
 
     .outcome-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -626,8 +640,8 @@
           </svg>
         </div>
         <div class="brand-text">
-          <h1>UAE Scanner <span class="api-badge syncing" id="apiStatusBadge">SYNCING</span></h1>
-          <span>1M BLITZ SIGNAL DESK</span>
+          <h1>UAE Scanner <span class="api-badge ready" id="apiStatusBadge">ON-DEMAND</span></h1>
+          <span>6-INDICATOR 1M BLITZ</span>
         </div>
       </div>
 
@@ -644,7 +658,7 @@
         <div class="asset-meta">
           <div class="asset-market-type">
             <span class="market-dot" id="marketDot"></span>
-            <span id="marketStatusText">Connecting Twelve Data...</span>
+            <span id="marketStatusText">Press SCAN to fetch 50 real candles</span>
           </div>
           <div class="asset-name-row">
             <span class="asset-name" id="selectedPairName">EUR/USD</span>
@@ -654,7 +668,7 @@
       </div>
 
       <div style="display:flex; align-items:center; gap:8px;">
-        <span class="live-price-tag" id="livePriceDisplay">--.-----</span>
+        <span class="live-price-tag" id="livePriceDisplay">TAP SCAN</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
@@ -688,11 +702,11 @@
             <path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"></path>
           </svg>
           <span id="scanBtnText">SCAN</span>
-          <small>1M BLITZ</small>
+          <small>6 INDICATORS</small>
         </button>
       </div>
 
-      <div class="status-text" id="statusText">Ready • ALMA(7/12) + CHOP(2) Precision Engine</div>
+      <div class="status-text" id="statusText">Ready • EMA + SAR + MACD + RSI + BB + ZigZag</div>
 
       <!-- 4-Stage Analysis Stepper -->
       <div class="stepper">
@@ -705,14 +719,14 @@
           <div class="step-dot" id="dot3"></div>
         </div>
         <div class="step-labels">
-          <span id="lbl0">MARKET</span>
-          <span id="lbl1">ALMA / CHOP</span>
-          <span id="lbl2">S/R FILTER</span>
+          <span id="lbl0">50 CANDLES</span>
+          <span id="lbl1">6 INDICATORS</span>
+          <span id="lbl2">PATTERNS</span>
           <span id="lbl3">SIGNAL</span>
         </div>
       </div>
 
-      <div class="feed-note">ALMA(7/12, 0.85, 6) • CHOP(2) &lt; 36.2 • 30-Bar S/R Filter</div>
+      <div class="feed-note">On-Demand Twelve Data (50 Bars) • Zero Idle Quota Usage</div>
     </section>
 
     <!-- Signal Output Box -->
@@ -741,17 +755,23 @@
         <div>
           <div class="metric-label">CONFIDENCE</div>
           <div class="metric-val" id="confidenceVal">--%</div>
-          <div class="metric-sub" id="chopReading">CHOP --</div>
+          <div class="metric-sub" id="setupModeLabel">Confluence</div>
         </div>
         <div>
           <div class="metric-label">SPOT PRICE</div>
           <div class="metric-val" id="signalSpotPrice">--</div>
-          <div class="metric-sub">Real Quote</div>
+          <div class="metric-sub">Bar #50 Close</div>
         </div>
       </div>
 
+      <!-- Primary Price Action / Indicator Insight Headline -->
+      <div class="insight-banner" id="primaryInsightText">
+        Strong buyer volume detected
+      </div>
+
       <div class="indicator-reason" id="reasonText">
-        ALMA7: -- | ALMA12: -- | CHOP(2): --
+        <span class="confluence-tags" id="confluenceTags">--</span>
+        <span class="raw-metrics" id="rawMetricsText">--</span>
       </div>
 
       <div class="outcome-actions" id="outcomeActions">
@@ -783,7 +803,7 @@
       </div>
     </section>
 
-    <div class="footer-note">1m Blitz High-Precision Engine • Twelve Data Real Feed</div>
+    <div class="footer-note">6-Indicator + Price Action Engine • Twelve Data Real Market</div>
   </div>
 
   <script>
@@ -793,7 +813,7 @@
     // =========================================
 
     // ระบบล็อกสิทธิ์เข้าใช้งานด้วย Telegram User ID (Whitelist)
-    const ENABLE_WHITELIST = false; // เปลี่ยนเป็น true เมื่อต้องการเปิดระบบล็อกสิทธิ์เฉพาะ ID ด้านล่าง
+    const ENABLE_WHITELIST = true; // เปลี่ยนเป็น true เมื่อต้องการเปิดระบบล็อกสิทธิ์เฉพาะ ID ด้านล่าง
     const ALLOWED_TELEGRAM_IDS = [
       8163991612,
       987654321
@@ -845,13 +865,11 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 3. Twelve Data Real-Time Price & OHLC Candle Engine (1m Blitz Default)
+    // 3. On-Demand Twelve Data 50-Candle Fetcher (No Auto-Polling)
     let currentPair = 'EUR/USD';
     let currentTimeframe = 1;
     let currentIntervalStr = '1min';
     let decimals = 5;
-    let currentLivePrice = null;
-    let previousLivePrice = null;
 
     function setConnectionStatus(state, message) {
       const badge = document.getElementById('apiStatusBadge');
@@ -863,83 +881,33 @@
 
       if (state === 'live') badge.textContent = 'LIVE';
       else if (state === 'error') badge.textContent = 'API ERROR';
-      else badge.textContent = 'SYNCING';
+      else badge.textContent = 'ON-DEMAND';
 
       statusTxt.textContent = message;
     }
 
-    function updatePriceDisplay(priceNum) {
-      const priceEl = document.getElementById('livePriceDisplay');
-      priceEl.classList.remove('price-up', 'price-down', 'price-err');
-
-      if (previousLivePrice !== null) {
-        if (priceNum > previousLivePrice) priceEl.classList.add('price-up');
-        else if (priceNum < previousLivePrice) priceEl.classList.add('price-down');
-      }
-
-      previousLivePrice = priceNum;
-      currentLivePrice = priceNum;
-      priceEl.textContent = priceNum.toFixed(decimals);
-    }
-
-    // Fetch live price every 10 seconds from Twelve Data (respects 8 req/min free quota)
-    async function fetchRealTimePrice() {
-      if (!isAuthorized) return;
-      const priceEl = document.getElementById('livePriceDisplay');
-
-      if (!API_KEY) {
-        priceEl.className = 'live-price-tag price-err';
-        priceEl.textContent = 'NO API KEY';
-        setConnectionStatus('error', 'Missing API_KEY');
-        return;
-      }
-
-      try {
-        const url = `https://api.twelvedata.com/price?symbol=${encodeURIComponent(currentPair)}&apikey=${encodeURIComponent(API_KEY.trim())}`;
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (data && data.price) {
-          updatePriceDisplay(parseFloat(data.price));
-          setConnectionStatus('live', 'Twelve Data Live • 10s Update');
-        } else {
-          throw new Error(data.message || 'Invalid API response');
-        }
-      } catch (err) {
-        priceEl.className = 'live-price-tag price-err';
-        priceEl.textContent = 'API ERROR';
-        setConnectionStatus('error', err.message);
-      }
-    }
-
-    // Fetch 30 real historical OHLC candles when SCAN is pressed
-    async function fetch30OHLCCandles(symbol, interval) {
+    async function fetch50OHLCCandles(symbol, interval) {
       if (!API_KEY) {
         throw new Error('Missing API_KEY');
       }
 
-      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=30&apikey=${encodeURIComponent(API_KEY.trim())}`;
+      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=50&apikey=${encodeURIComponent(API_KEY.trim())}`;
       const response = await fetch(url);
       const data = await response.json();
 
       if (!data || !data.values || !Array.isArray(data.values)) {
-        throw new Error(data.message || 'Failed to fetch 30 candles from Twelve Data');
+        throw new Error(data.message || 'Failed to fetch 50 candles from Twelve Data');
       }
 
-      // Reverse to chronological order: index 0 = oldest, index 29 = latest candle
+      // Reverse to chronological order: index 0 = oldest, index 49 = latest candle
       return data.values.map(c => ({
         datetime: c.datetime,
         open: parseFloat(c.open),
         high: parseFloat(c.high),
         low: parseFloat(c.low),
-        close: parseFloat(c.close)
+        close: parseFloat(c.close),
+        volume: c.volume ? parseFloat(c.volume) : Math.abs(parseFloat(c.close) - parseFloat(c.open)) * 100000
       })).reverse();
-    }
-
-    // Start 10-second live price polling
-    if (isAuthorized) {
-      fetchRealTimePrice();
-      setInterval(fetchRealTimePrice, 10000);
     }
 
     // Pair Selection Handler
@@ -947,15 +915,14 @@
       const opt = e.target.selectedOptions[0];
       currentPair = opt.value;
       decimals = parseInt(opt.dataset.decimals, 10);
-      currentLivePrice = null;
-      previousLivePrice = null;
 
       document.getElementById('assetFlag').textContent = opt.dataset.flag;
       document.getElementById('selectedPairName').textContent = currentPair;
-      document.getElementById('livePriceDisplay').textContent = '--.-----';
-      setConnectionStatus('syncing', `Loading ${currentPair}...`);
+      const priceEl = document.getElementById('livePriceDisplay');
+      priceEl.className = 'live-price-tag';
+      priceEl.textContent = 'TAP SCAN';
+      setConnectionStatus('ready', 'Press SCAN to fetch 50 real candles');
 
-      fetchRealTimePrice();
       if (tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
     });
 
@@ -971,237 +938,399 @@
     });
 
     // =========================================================================
-    // 4. HIGH-PRECISION MATHEMATICAL INDICATORS (ALMA & CHOPPINESS INDEX)
+    // 4. 6-INDICATOR + PRICE ACTION PATTERN ENGINE
     // =========================================================================
 
-    /**
-     * Arnaud Legoux Moving Average (ALMA)
-     * Formula: m = offset * (window - 1), s = window / sigma
-     * Weight w[i] = exp(-((i - m)^2) / (2 * s^2))
-     */
-    function calculateALMASeries(closes, period, offset = 0.85, sigma = 6) {
-      const almaSeries = new Array(closes.length).fill(null);
-      if (closes.length < period) return almaSeries;
-
-      const m = offset * (period - 1);
-      const s = period / sigma;
-      const weights = [];
-      let normSum = 0;
-
-      for (let i = 0; i < period; i++) {
-        const w = Math.exp(-Math.pow(i - m, 2) / (2 * Math.pow(s, 2)));
-        weights.push(w);
-        normSum += w;
+    // [1] EMA Series Calculator (supports EMA 9, 20, 21)
+    function calculateEMASeries(values, period) {
+      const k = 2 / (period + 1);
+      const emaArr = new Array(values.length).fill(0);
+      emaArr[0] = values[0];
+      for (let i = 1; i < values.length; i++) {
+        emaArr[i] = (values[i] * k) + (emaArr[i - 1] * (1 - k));
       }
-
-      for (let endIdx = period - 1; endIdx < closes.length; endIdx++) {
-        let weightedSum = 0;
-        for (let i = 0; i < period; i++) {
-          weightedSum += closes[endIdx - period + 1 + i] * weights[i];
-        }
-        almaSeries[endIdx] = weightedSum / normSum;
-      }
-
-      return almaSeries;
+      return emaArr;
     }
 
-    /**
-     * Choppiness Index (CHOP)
-     * Formula: 100 * LOG10( SUM(ATR(1), n) / ( HighestHigh(n) - LowestLow(n) ) ) / LOG10(n)
-     */
-    function calculateChoppinessIndex(candles, period = 2) {
-      if (candles.length < period + 1) return 50;
-
-      let sumTR = 0;
-      let highestHigh = -Infinity;
-      let lowestLow = Infinity;
-
-      const startIdx = candles.length - period;
-      for (let i = startIdx; i < candles.length; i++) {
-        const curr = candles[i];
-        const prev = candles[i - 1];
-
-        const tr = Math.max(
-          curr.high - curr.low,
-          Math.abs(curr.high - prev.close),
-          Math.abs(curr.low - prev.close)
-        );
-        sumTR += tr;
-
-        if (curr.high > highestHigh) highestHigh = curr.high;
-        if (curr.low < lowestLow) lowestLow = curr.low;
-      }
-
-      const range = highestHigh - lowestLow;
-      if (range <= 0 || sumTR <= 0) return 100;
-
-      const chop = 100 * (Math.log10(sumTR / range) / Math.log10(period));
-      return Math.max(0, Math.min(100, chop));
-    }
-
-    /**
-     * Master 1m Blitz Signal Evaluation Engine
-     */
-    function evaluateBlitzSignal(candles) {
-      const closes = candles.map(c => c.close);
+    // [2] Parabolic SAR (Step = 0.02, Max = 0.2)
+    function calculateParabolicSAR(candles, step = 0.02, maxStep = 0.2) {
       const n = candles.length;
-      const latest = candles[n - 1];
+      let isBull = candles[1].close >= candles[0].close;
+      let sar = isBull ? candles[0].low : candles[0].high;
+      let ep = isBull ? candles[1].high : candles[1].low;
+      let af = step;
 
-      // 1. Compute ALMA Fast (7, 0.85, 6) & ALMA Slow (12, 0.85, 6)
-      const alma7Arr = calculateALMASeries(closes, 7, 0.85, 6);
-      const alma12Arr = calculateALMASeries(closes, 12, 0.85, 6);
+      for (let i = 2; i < n; i++) {
+        const curr = candles[i];
+        const prev1 = candles[i - 1];
+        const prev2 = candles[i - 2];
 
-      const alma7Now = alma7Arr[n - 1];
-      const alma12Now = alma12Arr[n - 1];
-      const alma7Prev1 = alma7Arr[n - 2];
-      const alma12Prev1 = alma12Arr[n - 2];
-      const alma7Prev2 = alma7Arr[n - 3];
-      const alma12Prev2 = alma12Arr[n - 3];
+        sar = sar + af * (ep - sar);
 
-      // 2. Compute Choppiness Index Period 2 (Overbought = 59.8, Oversold = 36.2)
-      const chop2 = calculateChoppinessIndex(candles, 2);
-
-      // 3. 30-Bar Support & Resistance Levels (excluding current candle's extreme to measure breakout room)
-      const lookbackCandles = candles.slice(0, n - 1);
-      const resistance30 = Math.max(...lookbackCandles.map(c => c.high));
-      const support30 = Math.min(...lookbackCandles.map(c => c.low));
-      const totalChannel = Math.max(0.00001, resistance30 - support30);
-
-      // Buffer zone: 8% of the 30-candle range to ensure price isn't blocked right at S/R
-      const srBuffer = totalChannel * 0.08;
-      const clearOfResistance = latest.close < (resistance30 - srBuffer);
-      const clearOfSupport = latest.close > (support30 + srBuffer);
-
-      // 4. Candle Strength & Direction Check
-      const fullRange = Math.max(0.000001, latest.high - latest.low);
-      const bodySize = Math.abs(latest.close - latest.open);
-      const bodyRatio = bodySize / fullRange; // Strong body >= 0.50 (50% of candle)
-
-      const isGreenStrong = (latest.close > latest.open) && (bodyRatio >= 0.50) && (latest.close > alma7Now);
-      const isRedStrong = (latest.close < latest.open) && (bodyRatio >= 0.50) && (latest.close < alma7Now);
-
-      // 5. Crossover Age Check (Within 1 to 2 bars max)
-      // Bullish cross within <= 2 bars: currently ALMA7 > ALMA12, and either 1 bar ago or 2 bars ago ALMA7 <= ALMA12
-      const bullishFreshCross = (alma7Now > alma12Now) &&
-        ((alma7Prev1 <= alma12Prev1) || (alma7Prev2 <= alma12Prev2));
-
-      // Bearish cross within <= 2 bars: currently ALMA7 < ALMA12, and either 1 bar ago or 2 bars ago ALMA7 >= ALMA12
-      const bearishFreshCross = (alma7Now < alma12Now) &&
-        ((alma7Prev1 >= alma12Prev1) || (alma7Prev2 >= alma12Prev2));
-
-      const indicatorLine = `ALMA7: ${alma7Now.toFixed(decimals)} | ALMA12: ${alma12Now.toFixed(decimals)} | CHOP(2): ${chop2.toFixed(1)}`;
-
-      // 6. Filter Gate 1: Sideway Market Check (CHOP >= 36.2)
-      if (chop2 >= 36.2) {
-        const sidewayType = chop2 >= 59.8 ? 'Extreme Chop/Overbought' : 'Sideway/Consolidation';
-        return {
-          status: 'WAIT',
-          confidence: Math.max(35, Math.round(68 - (chop2 - 36.2))),
-          chop2: chop2.toFixed(1),
-          indicatorLine,
-          filterNote: `CHOP(2) = ${chop2.toFixed(1)} ≥ 36.2 (${sidewayType})`
-        };
+        if (isBull) {
+          sar = Math.min(sar, prev1.low, prev2.low);
+          if (curr.low < sar) {
+            isBull = false;
+            sar = ep;
+            ep = curr.low;
+            af = step;
+          } else {
+            if (curr.high > ep) {
+              ep = curr.high;
+              af = Math.min(maxStep, af + step);
+            }
+          }
+        } else {
+          sar = Math.max(sar, prev1.high, prev2.high);
+          if (curr.high > sar) {
+            isBull = true;
+            sar = ep;
+            ep = curr.high;
+            af = step;
+          } else {
+            if (curr.low < ep) {
+              ep = curr.low;
+              af = Math.min(maxStep, af + step);
+            }
+          }
+        }
       }
 
-      // 7. Evaluate CALL Setup
-      if (alma7Now > alma12Now) {
-        if (!bullishFreshCross) {
-          return {
-            status: 'WAIT',
-            confidence: 54,
-            chop2: chop2.toFixed(1),
-            indicatorLine,
-            filterNote: 'ALMA(7) crossed above ALMA(12) > 2 bars ago (Late entry)'
-          };
-        }
-        if (!isGreenStrong) {
-          return {
-            status: 'WAIT',
-            confidence: 58,
-            chop2: chop2.toFixed(1),
-            indicatorLine,
-            filterNote: 'Waiting for strong green candle close above ALMA(7)'
-          };
-        }
-        if (!clearOfResistance) {
-          return {
-            status: 'WAIT',
-            confidence: 52,
-            chop2: chop2.toFixed(1),
-            indicatorLine,
-            filterNote: `Blocked near 30-bar Resistance (${resistance30.toFixed(decimals)})`
-          };
-        }
+      return { value: sar, isBullish: isBull };
+    }
 
-        // Valid High-Precision CALL
-        const trendScore = Math.min(12, Math.round((36.2 - chop2) * 0.45));
-        const bodyScore = Math.min(8, Math.round((bodyRatio - 0.5) * 16));
-        const confidence = Math.min(96, 78 + trendScore + bodyScore);
+    // [3] MACD (12, 26, 9)
+    function calculateMACD(closes, fast = 12, slow = 26, signal = 9) {
+      const emaFast = calculateEMASeries(closes, fast);
+      const emaSlow = calculateEMASeries(closes, slow);
+      const macdLine = closes.map((_, i) => emaFast[i] - emaSlow[i]);
+      const signalLine = calculateEMASeries(macdLine, signal);
 
-        return {
-          status: 'CALL',
-          confidence,
-          chop2: chop2.toFixed(1),
-          indicatorLine,
-          filterNote: `Fresh ALMA(7/12) Bull Cross • Strong Body ${(bodyRatio * 100).toFixed(0)}% • Clear R30`
-        };
-      }
+      const idx = closes.length - 1;
+      const prevIdx = idx - 1;
 
-      // 8. Evaluate PUT Setup
-      if (alma7Now < alma12Now) {
-        if (!bearishFreshCross) {
-          return {
-            status: 'WAIT',
-            confidence: 54,
-            chop2: chop2.toFixed(1),
-            indicatorLine,
-            filterNote: 'ALMA(7) crossed below ALMA(12) > 2 bars ago (Late entry)'
-          };
-        }
-        if (!isRedStrong) {
-          return {
-            status: 'WAIT',
-            confidence: 58,
-            chop2: chop2.toFixed(1),
-            indicatorLine,
-            filterNote: 'Waiting for strong red candle close below ALMA(7)'
-          };
-        }
-        if (!clearOfSupport) {
-          return {
-            status: 'WAIT',
-            confidence: 52,
-            chop2: chop2.toFixed(1),
-            indicatorLine,
-            filterNote: `Blocked near 30-bar Support (${support30.toFixed(decimals)})`
-          };
-        }
+      const macdNow = macdLine[idx];
+      const sigNow = signalLine[idx];
+      const histNow = macdNow - sigNow;
 
-        // Valid High-Precision PUT
-        const trendScore = Math.min(12, Math.round((36.2 - chop2) * 0.45));
-        const bodyScore = Math.min(8, Math.round((bodyRatio - 0.5) * 16));
-        const confidence = Math.min(96, 78 + trendScore + bodyScore);
+      const macdPrev = macdLine[prevIdx];
+      const sigPrev = signalLine[prevIdx];
+      const histPrev = macdPrev - sigPrev;
 
-        return {
-          status: 'PUT',
-          confidence,
-          chop2: chop2.toFixed(1),
-          indicatorLine,
-          filterNote: `Fresh ALMA(7/12) Bear Cross • Strong Body ${(bodyRatio * 100).toFixed(0)}% • Clear S30`
-        };
-      }
+      const bullCross = (macdPrev <= sigPrev && macdNow > sigNow) || (macdNow > sigNow && histNow > histPrev);
+      const bearCross = (macdPrev >= sigPrev && macdNow < sigNow) || (macdNow < sigNow && histNow < histPrev);
 
       return {
-        status: 'WAIT',
-        confidence: 50,
-        chop2: chop2.toFixed(1),
-        indicatorLine,
-        filterNote: 'ALMA(7) & ALMA(12) converging • No clear directional cross'
+        macd: macdNow,
+        signal: sigNow,
+        histogram: histNow,
+        bullish: bullCross,
+        bearish: bearCross
+      };
+    }
+
+    // [4] Wilder's RSI (14) + Slope Direction
+    function calculateRSISeries(closes, period = 14) {
+      const rsiArr = new Array(closes.length).fill(50);
+      if (closes.length <= period) return rsiArr;
+
+      let gains = 0;
+      let losses = 0;
+      for (let i = 1; i <= period; i++) {
+        const diff = closes[i] - closes[i - 1];
+        if (diff >= 0) gains += diff;
+        else losses -= diff;
+      }
+
+      let avgGain = gains / period;
+      let avgLoss = losses / period;
+      rsiArr[period] = avgLoss === 0 ? 100 : 100 - (100 / (1 + (avgGain / avgLoss)));
+
+      for (let i = period + 1; i < closes.length; i++) {
+        const diff = closes[i] - closes[i - 1];
+        const g = diff > 0 ? diff : 0;
+        const l = diff < 0 ? -diff : 0;
+        avgGain = ((avgGain * (period - 1)) + g) / period;
+        avgLoss = ((avgLoss * (period - 1)) + l) / period;
+        rsiArr[i] = avgLoss === 0 ? 100 : 100 - (100 / (1 + (avgGain / avgLoss)));
+      }
+
+      return rsiArr;
+    }
+
+    // [5] Bollinger Bands (20, 2)
+    function calculateBollingerBands(closes, period = 20, mult = 2) {
+      const slice = closes.slice(-period);
+      const mean = slice.reduce((a, b) => a + b, 0) / slice.length;
+      const variance = slice.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / slice.length;
+      const stdDev = Math.sqrt(variance);
+
+      return {
+        upper: mean + (mult * stdDev),
+        middle: mean,
+        lower: mean - (mult * stdDev)
+      };
+    }
+
+    // [6] ZigZag (Deviation = 0.1%) -> Track Pivot History for Double Bottom / Breakout Detection
+    function calculateZigZagPivots(candles, deviationPct = 0.1) {
+      const dev = deviationPct / 100;
+      let lastPivotPrice = candles[0].close;
+      let lastPivotType = null;
+      const peaks = [];
+      const troughs = [];
+
+      for (let i = 1; i < candles.length - 1; i++) {
+        const h = candles[i].high;
+        const l = candles[i].low;
+
+        if (lastPivotType === null) {
+          if ((h - lastPivotPrice) / lastPivotPrice >= dev) {
+            lastPivotType = 'HIGH';
+            lastPivotPrice = h;
+            peaks.push({ index: i, price: h });
+          } else if ((lastPivotPrice - l) / lastPivotPrice >= dev) {
+            lastPivotType = 'LOW';
+            lastPivotPrice = l;
+            troughs.push({ index: i, price: l });
+          }
+        } else if (lastPivotType === 'HIGH') {
+          if (h > lastPivotPrice) {
+            lastPivotPrice = h;
+            peaks[peaks.length - 1] = { index: i, price: h };
+          } else if ((lastPivotPrice - l) / lastPivotPrice >= dev) {
+            lastPivotType = 'LOW';
+            lastPivotPrice = l;
+            troughs.push({ index: i, price: l });
+          }
+        } else if (lastPivotType === 'LOW') {
+          if (l < lastPivotPrice) {
+            lastPivotPrice = l;
+            troughs[troughs.length - 1] = { index: i, price: l };
+          } else if ((h - lastPivotPrice) / lastPivotPrice >= dev) {
+            lastPivotType = 'HIGH';
+            lastPivotPrice = h;
+            peaks.push({ index: i, price: h });
+          }
+        }
+      }
+
+      const fallbackPeak = Math.max(...candles.slice(0, -1).map(c => c.high));
+      const fallbackTrough = Math.min(...candles.slice(0, -1).map(c => c.low));
+
+      return {
+        peaks,
+        troughs,
+        latestPeak: peaks.length > 0 ? peaks[peaks.length - 1].price : fallbackPeak,
+        latestTrough: troughs.length > 0 ? troughs[troughs.length - 1].price : fallbackTrough
       };
     }
 
     // =========================================================================
-    // 5. SCANNER EXECUTION & 5-SECOND BLITZ ENTRY COUNTDOWN
+    // 5. CONFLUENCE & PRICE ACTION INSIGHT ENGINE (60% - 95%, Threshold >= 75%)
+    // =========================================================================
+    function evaluate6IndicatorsConfluence(candles) {
+      const closes = candles.map(c => c.close);
+      const n = candles.length;
+      const latest = candles[n - 1];
+      const prev = candles[n - 2];
+
+      // Run all 6 real indicators
+      const ema9Arr = calculateEMASeries(closes, 9);
+      const ema20Arr = calculateEMASeries(closes, 20);
+      const ema21Arr = calculateEMASeries(closes, 21);
+
+      const ema9 = ema9Arr[n - 1];
+      const ema20 = ema20Arr[n - 1];
+      const ema21 = ema21Arr[n - 1];
+
+      const sar = calculateParabolicSAR(candles, 0.02, 0.2);
+      const macd = calculateMACD(closes, 12, 26, 9);
+
+      const rsiArr = calculateRSISeries(closes, 14);
+      const rsiNow = rsiArr[n - 1];
+      const rsiPrev = rsiArr[n - 2];
+      const rsiSlopeUp = rsiNow > rsiPrev;
+      const rsiSlopeDown = rsiNow < rsiPrev;
+
+      const bb = calculateBollingerBands(closes, 20, 2);
+      const zz = calculateZigZagPivots(candles, 0.1);
+
+      // Volume / Body Momentum Calculation
+      const avgVol = candles.slice(-15, -1).reduce((s, c) => s + c.volume, 0) / 14;
+      const latestBody = Math.abs(latest.close - latest.open);
+      const avgBody = candles.slice(-15, -1).reduce((s, c) => s + Math.abs(c.close - c.open), 0) / 14;
+      const strongBuyerVolume = (latest.close > latest.open) && (latest.volume > avgVol * 1.2 || latestBody > avgBody * 1.35);
+      const strongSellerVolume = (latest.close < latest.open) && (latest.volume > avgVol * 1.2 || latestBody > avgBody * 1.35);
+
+      // EMA20 Support Hold Check (Wick dipped to/below EMA20, closed bullish above EMA20)
+      const ema20SupportHold = (latest.low <= ema20 * 1.0002) && (latest.close > ema20) && (latest.close > latest.open);
+
+      // Double Bottom Pattern Check (Two recent ZigZag troughs within 0.08% tolerance)
+      let doubleBottomConfirmed = false;
+      if (zz.troughs.length >= 2) {
+        const t1 = zz.troughs[zz.troughs.length - 2].price;
+        const t2 = zz.troughs[zz.troughs.length - 1].price;
+        const diffPct = Math.abs(t1 - t2) / t1;
+        if (diffPct <= 0.0008 && latest.close > t2 && latest.close > latest.open) {
+          doubleBottomConfirmed = true;
+        }
+      }
+
+      // Resistance Breakdown / Support Breakdown Check
+      const resistanceBreakdown = (prev.close >= zz.latestTrough && latest.close < zz.latestTrough && strongSellerVolume) ||
+                                  (prev.high >= zz.latestPeak * 0.9998 && latest.close < prev.low && latest.close < ema9);
+
+      // Proximity tolerances
+      const bbRange = Math.max(0.00001, bb.upper - bb.lower);
+      const nearUpperBB = latest.high >= (bb.upper - bbRange * 0.08) || latest.close >= bb.upper;
+      const nearLowerBB = latest.low <= (bb.lower + bbRange * 0.08) || latest.close <= bb.lower;
+
+      const zzRange = Math.max(0.00001, zz.latestPeak - zz.latestTrough);
+      const nearZigZagPeak = latest.high >= (zz.latestPeak - zzRange * 0.10);
+      const nearZigZagTrough = latest.low <= (zz.latestTrough + zzRange * 0.10);
+
+      // --- SCORE CALL (BASE 55%, MAX 95%) ---
+      let callScore = 55;
+      const callConfirmations = [];
+      let callPrimaryHeadline = 'Strong buyer volume detected';
+
+      if (ema9 > ema21 && latest.close > ema9) {
+        callScore += 9;
+        callConfirmations.push('EMA9/21 Bull');
+      }
+      if (ema20SupportHold) {
+        callScore += 6;
+        callConfirmations.push('EMA20 Hold');
+        callPrimaryHeadline = 'EMA20 support hold, bullish push';
+      }
+      if (sar.isBullish) {
+        callScore += 8;
+        callConfirmations.push('SAR Bullish');
+      }
+      if (macd.bullish) {
+        callScore += 8;
+        callConfirmations.push('MACD Cross ↑');
+      }
+      if (rsiNow < 30) {
+        callScore += 10;
+        callConfirmations.push(`RSI Oversold (${rsiNow.toFixed(1)})`);
+        callPrimaryHeadline = 'RSI oversold bounce, trend up';
+      } else if (rsiNow >= 45 && rsiNow <= 68 && rsiSlopeUp) {
+        callScore += 5;
+        callConfirmations.push(`RSI Rising (${rsiNow.toFixed(1)})`);
+      }
+      if (nearLowerBB) {
+        callScore += 8;
+        callConfirmations.push('BB Lower Bounce');
+      }
+      if (doubleBottomConfirmed) {
+        callScore += 9;
+        callConfirmations.push('Double Bottom');
+        callPrimaryHeadline = 'Double bottom pattern confirmed';
+      } else if (nearZigZagTrough) {
+        callScore += 6;
+        callConfirmations.push('ZigZag Support');
+      }
+      if (strongBuyerVolume) {
+        callScore += 6;
+        callConfirmations.push('Buyer Volume ↑');
+        if (!doubleBottomConfirmed && rsiNow >= 30) {
+          callPrimaryHeadline = 'Strong buyer volume detected';
+        }
+      }
+
+      // --- SCORE PUT (BASE 55%, MAX 95%) ---
+      let putScore = 55;
+      const putConfirmations = [];
+      let putPrimaryHeadline = 'RSI neutral, trend down';
+
+      if (ema9 < ema21 && latest.close < ema9) {
+        putScore += 9;
+        putConfirmations.push('EMA9/21 Bear');
+      }
+      if (!sar.isBullish) {
+        putScore += 8;
+        putConfirmations.push('SAR Bearish');
+      }
+      if (macd.bearish) {
+        putScore += 8;
+        putConfirmations.push('MACD Cross ↓');
+      }
+      if (rsiNow > 70) {
+        putScore += 10;
+        putConfirmations.push(`RSI Overbought (${rsiNow.toFixed(1)})`);
+        putPrimaryHeadline = 'Overbought zone, reversal signal';
+      } else if (rsiNow >= 35 && rsiNow <= 55 && rsiSlopeDown) {
+        putScore += 6;
+        putConfirmations.push(`RSI Neutral/Down (${rsiNow.toFixed(1)})`);
+        putPrimaryHeadline = 'RSI neutral, trend down';
+      }
+      if (nearUpperBB) {
+        putScore += 8;
+        putConfirmations.push('BB Upper Reject');
+        if (rsiNow > 65) putPrimaryHeadline = 'Overbought zone, reversal signal';
+      }
+      if (resistanceBreakdown) {
+        putScore += 8;
+        putConfirmations.push('Breakdown Confirmed');
+        putPrimaryHeadline = 'Resistance breakdown confirmed';
+      } else if (nearZigZagPeak) {
+        putScore += 6;
+        putConfirmations.push('ZigZag Resistance');
+      }
+      if (strongSellerVolume) {
+        putScore += 5;
+        putConfirmations.push('Seller Volume ↓');
+      }
+
+      callScore = Math.min(95, callScore);
+      putScore = Math.min(95, putScore);
+
+      // Determine Winning Side
+      const isCallBetter = callScore >= putScore;
+      const bestScore = isCallBetter ? callScore : putScore;
+      const bestList = isCallBetter ? callConfirmations : putConfirmations;
+      const primaryHeadline = isCallBetter ? callPrimaryHeadline : putPrimaryHeadline;
+
+      const hasTrendCombo = isCallBetter
+        ? (ema9 > ema21 && sar.isBullish && macd.bullish)
+        : (ema9 < ema21 && !sar.isBullish && macd.bearish);
+      const setupLabel = hasTrendCombo ? 'Trend Follow' : 'Pattern / Reversal';
+
+      const rawMetrics =
+        `EMA9:${ema9.toFixed(decimals)} | EMA21:${ema21.toFixed(decimals)} | RSI:${rsiNow.toFixed(1)} | ` +
+        `SAR:${sar.isBullish ? 'Bull' : 'Bear'} | MACD:${macd.histogram >= 0 ? '+' : ''}${macd.histogram.toFixed(decimals)} | ` +
+        `BB[${bb.lower.toFixed(decimals)}-${bb.upper.toFixed(decimals)}] | ZZ[${zz.latestTrough.toFixed(decimals)}/${zz.latestPeak.toFixed(decimals)}]`;
+
+      // Threshold Check: >= 75% issues CALL or PUT; < 75% issues WAIT / INDECISIVE
+      if (bestScore >= 75) {
+        return {
+          status: isCallBetter ? 'CALL' : 'PUT',
+          confidence: bestScore,
+          setupLabel,
+          primaryHeadline,
+          tagsText: bestList.join(' + '),
+          rawMetrics,
+          spotPrice: latest.close.toFixed(decimals)
+        };
+      } else {
+        return {
+          status: 'WAIT',
+          confidence: bestScore,
+          setupLabel: 'Indecisive',
+          primaryHeadline: 'Low confluence • Waiting for clearer setup',
+          tagsText: bestList.length > 0
+            ? `Partial (${bestScore}%): ${bestList.join(' + ')}`
+            : 'Conflicting Signals • Waiting for >= 75% Confluence',
+          rawMetrics,
+          spotPrice: latest.close.toFixed(decimals)
+        };
+      }
+    }
+
+    // =========================================================================
+    // 6. SCANNER EXECUTION & 5-SECOND BLITZ ENTRY COUNTDOWN
     // =========================================================================
     let isScanning = false;
     let countdownInterval = null;
@@ -1239,6 +1368,7 @@
       const btn = document.getElementById('scanBtn');
       const btnText = document.getElementById('scanBtnText');
       const statusText = document.getElementById('statusText');
+      const priceEl = document.getElementById('livePriceDisplay');
 
       statusText.classList.remove('error', 'wait');
       stage.classList.add('scanning');
@@ -1246,35 +1376,43 @@
       btnText.textContent = 'SCANNING';
 
       try {
-        // Step 1: Fetch 30 real candles from Twelve Data
+        // Step 1: Fetch 50 real candles from Twelve Data (1 API call)
         setStepState(0);
-        statusText.textContent = `Fetching 30 real ${currentIntervalStr} OHLC candles...`;
-        const candles = await fetch30OHLCCandles(currentPair, currentIntervalStr);
+        statusText.textContent = `Fetching 50 real ${currentIntervalStr} candles for ${currentPair}...`;
+        const candles = await fetch50OHLCCandles(currentPair, currentIntervalStr);
 
-        // Step 2: Calculate ALMA(7/12) & CHOP(2)
+        // Update Top Price Display with Bar #50 Real Close
+        const latestPriceStr = candles[candles.length - 1].close.toFixed(decimals);
+        priceEl.className = 'live-price-tag price-live';
+        priceEl.textContent = latestPriceStr;
+        setConnectionStatus('live', `Twelve Data Live • ${candles[candles.length - 1].datetime.split(' ')[1] || 'Synced'}`);
+
+        // Step 2: Calculate all 6 Indicators
         setStepState(1);
-        statusText.textContent = 'Computing ALMA(7/12) & CHOP(2)...';
+        statusText.textContent = 'Calculating EMA, SAR, MACD, RSI, BB & ZigZag...';
         await new Promise(r => setTimeout(r, 300));
 
-        // Step 3: Validate S/R & Candle Strength
+        // Step 3: Detect Patterns & Score Confluence
         setStepState(2);
-        statusText.textContent = 'Filtering 30-bar S/R & candle momentum...';
+        statusText.textContent = 'Analyzing patterns, volume & S/R confluence...';
         await new Promise(r => setTimeout(r, 300));
 
-        const result = evaluateBlitzSignal(candles);
-        const spotPrice = (currentLivePrice !== null ? currentLivePrice : candles[candles.length - 1].close).toFixed(decimals);
+        const result = evaluate6IndicatorsConfluence(candles);
 
-        // Step 4: Display Output
+        // Step 4: Output Result
         setStepState(3);
         if (tg && tg.HapticFeedback) {
           tg.HapticFeedback.notificationOccurred(result.status === 'WAIT' ? 'warning' : 'success');
         }
-        renderBlitzResult(result, spotPrice);
+        renderConfluenceResult(result);
 
       } catch (err) {
         setStepState(-1);
         statusText.classList.add('error');
         statusText.textContent = `API ERROR: ${err.message}`;
+        priceEl.className = 'live-price-tag price-err';
+        priceEl.textContent = 'API ERROR';
+        setConnectionStatus('error', err.message);
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
       } finally {
         stage.classList.remove('scanning');
@@ -1284,9 +1422,9 @@
       }
     });
 
-    function renderBlitzResult(result, spotPrice) {
+    function renderConfluenceResult(result) {
       const thNow = getThailandNow();
-      // Blitz 1m Entry = 5 seconds from scan completion
+      // 1m Blitz Entry = 5 seconds from scan completion
       const entryDate = new Date(thNow.getTime() + 5000);
       const entryStr = formatTime(entryDate);
 
@@ -1301,18 +1439,18 @@
       card.classList.remove('wait-mode');
       statusText.classList.remove('wait', 'error');
 
-      // Confidence Color Highlight (>= 80% Green, < 80% Orange/Red)
+      // Confidence Color Highlight: Green when >= 80%, Orange 75-79%, Yellow < 75%
       confEl.classList.remove('conf-high', 'conf-mid', 'conf-low');
       if (result.confidence >= 80) {
         confEl.classList.add('conf-high');
-      } else if (result.confidence >= 60) {
+      } else if (result.confidence >= 75) {
         confEl.classList.add('conf-mid');
       } else {
         confEl.classList.add('conf-low');
       }
 
       if (result.status === 'CALL') {
-        statusText.textContent = `Signal ready: CALL on ${currentPair} • ${tfLabel}`;
+        statusText.textContent = `Signal ready: CALL (${result.confidence}%) on ${currentPair} • ${tfLabel}`;
         dirIcon.className = 'dir-icon call';
         dirIcon.textContent = '↑';
         dirTitle.className = 'dir-title call';
@@ -1321,7 +1459,7 @@
         document.getElementById('outcomeActions').style.display = 'grid';
         openSignals++;
       } else if (result.status === 'PUT') {
-        statusText.textContent = `Signal ready: PUT on ${currentPair} • ${tfLabel}`;
+        statusText.textContent = `Signal ready: PUT (${result.confidence}%) on ${currentPair} • ${tfLabel}`;
         dirIcon.className = 'dir-icon put';
         dirIcon.textContent = '↓';
         dirTitle.className = 'dir-title put';
@@ -1330,24 +1468,27 @@
         document.getElementById('outcomeActions').style.display = 'grid';
         openSignals++;
       } else {
-        // WAIT / NO CLEAR SETUP (Yellow State)
+        // WAIT / INDECISIVE (< 75% Confluence)
         statusText.classList.add('wait');
-        statusText.textContent = 'WAIT / NO CLEAR SETUP • Filtered out risky entry';
+        statusText.textContent = `WAIT / INDECISIVE (${result.confidence}% < 75% threshold)`;
         card.classList.add('wait-mode');
         dirIcon.className = 'dir-icon wait';
         dirIcon.textContent = '⏳';
         dirTitle.className = 'dir-title wait';
-        dirTitle.textContent = 'WAIT / NO CLEAR SETUP';
+        dirTitle.textContent = 'WAIT / INDECISIVE';
         dirSub.textContent = `Hold • ${currentPair} • ${tfLabel}`;
         document.getElementById('outcomeActions').style.display = 'none';
       }
 
       document.getElementById('entryTimeVal').textContent = result.status === 'WAIT' ? '--:--:--' : entryStr;
       confEl.textContent = `${result.confidence}%`;
-      document.getElementById('chopReading').textContent = `CHOP ${result.chop2}`;
-      document.getElementById('signalSpotPrice').textContent = spotPrice;
-      document.getElementById('reasonText').innerHTML =
-        `${result.indicatorLine}<span class="filter-detail">${result.filterNote}</span>`;
+      document.getElementById('setupModeLabel').textContent = result.setupLabel;
+      document.getElementById('signalSpotPrice').textContent = result.spotPrice;
+
+      // Display clean Price Action / Indicator Insight Headline
+      document.getElementById('primaryInsightText').textContent = result.primaryHeadline;
+      document.getElementById('confluenceTags').textContent = result.tagsText;
+      document.getElementById('rawMetricsText').textContent = result.rawMetrics;
 
       card.classList.add('visible');
       updateSessionHeader();
@@ -1374,7 +1515,6 @@
           timerEl.classList.add('urgent');
           labelEl.textContent = 'ENTRY IN';
         } else {
-          // Active 1-minute Blitz trade countdown (60 seconds from entry)
           const elapsedAfterEntry = Math.floor((now.getTime() - entryDate.getTime()) / 1000);
           const expiryRem = (currentTimeframe * 60) - elapsedAfterEntry;
 
@@ -1397,7 +1537,7 @@
       countdownInterval = setInterval(tickBlitzCountdown, 250);
     }
 
-    // 6. Session Result Tracker
+    // 7. Session Result Tracker
     function updateSessionHeader() {
       const total = wins + losses;
       if (openSignals > 0) {

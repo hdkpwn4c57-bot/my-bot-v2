@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>UAE Scanner - Twelve Data Real Market</title>
+  <title>UAE Scanner - 1m Blitz Pro</title>
   
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -25,6 +25,8 @@
       --green-bg: rgba(16, 185, 129, 0.14);
       --red: #ef4444;
       --red-bg: rgba(239, 68, 68, 0.14);
+      --yellow: #facc15;
+      --yellow-bg: rgba(250, 204, 21, 0.14);
       --text-primary: #f8fafc;
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
@@ -244,14 +246,14 @@
     .asset-name-row { display: flex; align-items: center; gap: 8px; }
     .asset-name { font-size: 16px; font-weight: 700; letter-spacing: 0.3px; }
 
-    .tag-real {
-      background: var(--green-bg);
-      color: var(--green);
+    .tag-blitz {
+      background: rgba(255, 149, 0, 0.16);
+      color: var(--accent-orange);
       font-size: 10px;
       font-weight: 800;
       padding: 2px 6px;
       border-radius: 5px;
-      border: 1px solid rgba(16, 185, 129, 0.35);
+      border: 1px solid rgba(255, 149, 0, 0.35);
     }
 
     .live-price-tag {
@@ -306,7 +308,7 @@
     .tf-btn.active {
       background: var(--accent-orange);
       color: #0b0c0e;
-      font-weight: 700;
+      font-weight: 800;
       box-shadow: 0 4px 14px var(--accent-orange-glow);
     }
 
@@ -363,7 +365,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       cursor: pointer;
       position: relative;
       z-index: 2;
@@ -373,8 +375,9 @@
     .scan-btn:active { transform: scale(0.95); }
     .scan-btn:disabled { cursor: not-allowed; filter: brightness(0.9); }
 
-    .scan-btn svg { width: 30px; height: 30px; stroke: #111215; stroke-width: 2.2; }
+    .scan-btn svg { width: 28px; height: 28px; stroke: #111215; stroke-width: 2.2; }
     .scan-btn span { font-size: 15px; font-weight: 800; letter-spacing: 2px; }
+    .scan-btn small { font-size: 9px; font-weight: 800; letter-spacing: 1px; opacity: 0.85; }
 
     .status-text {
       font-size: 13px;
@@ -387,6 +390,7 @@
     }
 
     .status-text.error { color: var(--red); }
+    .status-text.wait { color: var(--yellow); }
 
     /* Progress Stepper */
     .stepper { width: 100%; padding: 0 10px; margin-bottom: 10px; }
@@ -468,6 +472,7 @@
     }
 
     .signal-card.visible { display: flex; }
+    .signal-card.wait-mode { border-color: rgba(250, 204, 21, 0.45); }
 
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(10px); }
@@ -486,23 +491,26 @@
       justify-content: center;
       font-size: 22px;
       font-weight: 800;
+      flex-shrink: 0;
     }
 
-    .dir-icon.call { background: var(--green-bg); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.3); }
-    .dir-icon.put { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .dir-icon.call { background: var(--green-bg); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.35); }
+    .dir-icon.put { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.35); }
+    .dir-icon.wait { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(250, 204, 21, 0.4); }
 
-    .dir-title { font-size: 24px; font-weight: 800; letter-spacing: 0.5px; line-height: 1.1; }
+    .dir-title { font-size: 22px; font-weight: 800; letter-spacing: 0.4px; line-height: 1.1; }
     .dir-title.call { color: var(--green); }
     .dir-title.put { color: var(--red); }
-    .dir-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .dir-title.wait { color: var(--yellow); font-size: 18px; }
+    .dir-sub { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
 
     .countdown-box {
       background: var(--bg-card-inner);
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      padding: 8px 14px;
+      padding: 8px 12px;
       text-align: center;
-      min-width: 92px;
+      min-width: 90px;
     }
 
     .countdown-time {
@@ -529,15 +537,28 @@
     .metric-val { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--text-primary); }
     .metric-sub { font-size: 10px; color: var(--accent-orange); margin-top: 2px; }
 
+    /* Confidence Color Highlights */
+    .conf-high { color: var(--green) !important; }
+    .conf-mid { color: var(--accent-orange) !important; }
+    .conf-low { color: var(--red) !important; }
+
     .indicator-reason {
       text-align: center;
       font-size: 11px;
       color: var(--text-secondary);
       background: var(--bg-card-inner);
-      padding: 9px 10px;
+      padding: 10px;
       border-radius: 10px;
       font-family: 'JetBrains Mono', monospace;
-      line-height: 1.5;
+      line-height: 1.55;
+    }
+
+    .filter-detail {
+      display: block;
+      margin-top: 4px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      color: var(--text-muted);
     }
 
     .outcome-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -545,7 +566,7 @@
     .btn-outcome {
       border: none;
       border-radius: 10px;
-      padding: 9px;
+      padding: 10px;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
@@ -606,7 +627,7 @@
         </div>
         <div class="brand-text">
           <h1>UAE Scanner <span class="api-badge syncing" id="apiStatusBadge">SYNCING</span></h1>
-          <span>SIGNAL DESK</span>
+          <span>1M BLITZ SIGNAL DESK</span>
         </div>
       </div>
 
@@ -627,7 +648,7 @@
           </div>
           <div class="asset-name-row">
             <span class="asset-name" id="selectedPairName">EUR/USD</span>
-            <span class="tag-real">REAL</span>
+            <span class="tag-blitz">1M BLITZ</span>
           </div>
         </div>
       </div>
@@ -647,7 +668,7 @@
       </select>
     </div>
 
-    <!-- Timeframe Selector -->
+    <!-- Timeframe Selector (1m Active Default for Blitz) -->
     <div class="tf-grid" id="tfSelector">
       <button class="tf-btn active" data-tf="1" data-interval="1min">1m</button>
       <button class="tf-btn" data-tf="3" data-interval="3min">3m</button>
@@ -667,10 +688,11 @@
             <path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"></path>
           </svg>
           <span id="scanBtnText">SCAN</span>
+          <small>1M BLITZ</small>
         </button>
       </div>
 
-      <div class="status-text" id="statusText">Ready to scan real Twelve Data candles</div>
+      <div class="status-text" id="statusText">Ready • ALMA(7/12) + CHOP(2) Precision Engine</div>
 
       <!-- 4-Stage Analysis Stepper -->
       <div class="stepper">
@@ -684,13 +706,13 @@
         </div>
         <div class="step-labels">
           <span id="lbl0">MARKET</span>
-          <span id="lbl1">INDICATORS</span>
-          <span id="lbl2">ANALYSIS</span>
+          <span id="lbl1">ALMA / CHOP</span>
+          <span id="lbl2">S/R FILTER</span>
           <span id="lbl3">SIGNAL</span>
         </div>
       </div>
 
-      <div class="feed-note">Twelve Data Live Feed • 10s Interval • No OTC</div>
+      <div class="feed-note">ALMA(7/12, 0.85, 6) • CHOP(2) &lt; 36.2 • 30-Bar S/R Filter</div>
     </section>
 
     <!-- Signal Output Box -->
@@ -700,36 +722,36 @@
           <div class="dir-icon put" id="dirIcon">↓</div>
           <div>
             <div class="dir-title put" id="dirTitle">PUT</div>
-            <div class="dir-sub" id="dirSub">Lower • EUR/USD REAL • 1 min</div>
+            <div class="dir-sub" id="dirSub">Lower • EUR/USD • 1 min (Blitz)</div>
           </div>
         </div>
 
-        <div class="countdown-box">
-          <div class="countdown-time" id="countdownTimer">00:00</div>
+        <div class="countdown-box" id="countdownBox">
+          <div class="countdown-time" id="countdownTimer">00:05</div>
           <div class="countdown-label" id="countdownLabel">ENTRY IN</div>
         </div>
       </div>
 
       <div class="signal-metrics">
         <div>
-          <div class="metric-label">ENTRY</div>
+          <div class="metric-label">ENTRY (+5S)</div>
           <div class="metric-val" id="entryTimeVal">--:--:--</div>
           <div class="metric-sub">Thailand GMT+7</div>
         </div>
         <div>
           <div class="metric-label">CONFIDENCE</div>
           <div class="metric-val" id="confidenceVal">--%</div>
-          <div class="metric-sub" id="rsiReading">RSI --</div>
+          <div class="metric-sub" id="chopReading">CHOP --</div>
         </div>
         <div>
-          <div class="metric-label">MARKET PRICE</div>
+          <div class="metric-label">SPOT PRICE</div>
           <div class="metric-val" id="signalSpotPrice">--</div>
           <div class="metric-sub">Real Quote</div>
         </div>
       </div>
 
       <div class="indicator-reason" id="reasonText">
-        RSI(14): -- | EMA9: -- | EMA21: --
+        ALMA7: -- | ALMA12: -- | CHOP(2): --
       </div>
 
       <div class="outcome-actions" id="outcomeActions">
@@ -761,7 +783,7 @@
       </div>
     </section>
 
-    <div class="footer-note">Powered by Twelve Data Real-Time API</div>
+    <div class="footer-note">1m Blitz High-Precision Engine • Twelve Data Real Feed</div>
   </div>
 
   <script>
@@ -771,7 +793,7 @@
     // =========================================
 
     // ระบบล็อกสิทธิ์เข้าใช้งานด้วย Telegram User ID (Whitelist)
-    const ENABLE_WHITELIST = true; // เปลี่ยนเป็น true เมื่อต้องการเปิดระบบล็อกสิทธิ์เฉพาะ ID ด้านล่าง
+    const ENABLE_WHITELIST = false; // เปลี่ยนเป็น true เมื่อต้องการเปิดระบบล็อกสิทธิ์เฉพาะ ID ด้านล่าง
     const ALLOWED_TELEGRAM_IDS = [
       8163991612,
       987654321
@@ -823,7 +845,7 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 3. Twelve Data Real-Time Price & 30-Candle Engine
+    // 3. Twelve Data Real-Time Price & OHLC Candle Engine (1m Blitz Default)
     let currentPair = 'EUR/USD';
     let currentTimeframe = 1;
     let currentIntervalStr = '1min';
@@ -860,7 +882,7 @@
       priceEl.textContent = priceNum.toFixed(decimals);
     }
 
-    // Fetch live price every 10 seconds from Twelve Data (<= 6 requests/min)
+    // Fetch live price every 10 seconds from Twelve Data (respects 8 req/min free quota)
     async function fetchRealTimePrice() {
       if (!isAuthorized) return;
       const priceEl = document.getElementById('livePriceDisplay');
@@ -890,8 +912,8 @@
       }
     }
 
-    // Fetch 30 real historical candles when SCAN is pressed
-    async function fetch30Candles(symbol, interval) {
+    // Fetch 30 real historical OHLC candles when SCAN is pressed
+    async function fetch30OHLCCandles(symbol, interval) {
       if (!API_KEY) {
         throw new Error('Missing API_KEY');
       }
@@ -904,8 +926,14 @@
         throw new Error(data.message || 'Failed to fetch 30 candles from Twelve Data');
       }
 
-      // Reverse array to chronological order (oldest -> newest)
-      return data.values.map(candle => parseFloat(candle.close)).reverse();
+      // Reverse to chronological order: index 0 = oldest, index 29 = latest candle
+      return data.values.map(c => ({
+        datetime: c.datetime,
+        open: parseFloat(c.open),
+        high: parseFloat(c.high),
+        low: parseFloat(c.low),
+        close: parseFloat(c.close)
+      })).reverse();
     }
 
     // Start 10-second live price polling
@@ -942,79 +970,239 @@
       });
     });
 
-    // 4. Real Technical Indicator Calculations (Wilder's RSI-14 & EMA-9 / EMA-21)
-    function calculateEMA(prices, period) {
-      const k = 2 / (period + 1);
-      let ema = prices[0];
-      for (let i = 1; i < prices.length; i++) {
-        ema = (prices[i] * k) + (ema * (1 - k));
+    // =========================================================================
+    // 4. HIGH-PRECISION MATHEMATICAL INDICATORS (ALMA & CHOPPINESS INDEX)
+    // =========================================================================
+
+    /**
+     * Arnaud Legoux Moving Average (ALMA)
+     * Formula: m = offset * (window - 1), s = window / sigma
+     * Weight w[i] = exp(-((i - m)^2) / (2 * s^2))
+     */
+    function calculateALMASeries(closes, period, offset = 0.85, sigma = 6) {
+      const almaSeries = new Array(closes.length).fill(null);
+      if (closes.length < period) return almaSeries;
+
+      const m = offset * (period - 1);
+      const s = period / sigma;
+      const weights = [];
+      let normSum = 0;
+
+      for (let i = 0; i < period; i++) {
+        const w = Math.exp(-Math.pow(i - m, 2) / (2 * Math.pow(s, 2)));
+        weights.push(w);
+        normSum += w;
       }
-      return ema;
+
+      for (let endIdx = period - 1; endIdx < closes.length; endIdx++) {
+        let weightedSum = 0;
+        for (let i = 0; i < period; i++) {
+          weightedSum += closes[endIdx - period + 1 + i] * weights[i];
+        }
+        almaSeries[endIdx] = weightedSum / normSum;
+      }
+
+      return almaSeries;
     }
 
-    function calculateRSI(prices, period = 14) {
-      if (prices.length <= period) return 50;
+    /**
+     * Choppiness Index (CHOP)
+     * Formula: 100 * LOG10( SUM(ATR(1), n) / ( HighestHigh(n) - LowestLow(n) ) ) / LOG10(n)
+     */
+    function calculateChoppinessIndex(candles, period = 2) {
+      if (candles.length < period + 1) return 50;
 
-      let gains = 0;
-      let losses = 0;
+      let sumTR = 0;
+      let highestHigh = -Infinity;
+      let lowestLow = Infinity;
 
-      for (let i = 1; i <= period; i++) {
-        const diff = prices[i] - prices[i - 1];
-        if (diff >= 0) gains += diff;
-        else losses -= diff;
+      const startIdx = candles.length - period;
+      for (let i = startIdx; i < candles.length; i++) {
+        const curr = candles[i];
+        const prev = candles[i - 1];
+
+        const tr = Math.max(
+          curr.high - curr.low,
+          Math.abs(curr.high - prev.close),
+          Math.abs(curr.low - prev.close)
+        );
+        sumTR += tr;
+
+        if (curr.high > highestHigh) highestHigh = curr.high;
+        if (curr.low < lowestLow) lowestLow = curr.low;
       }
 
-      let avgGain = gains / period;
-      let avgLoss = losses / period;
+      const range = highestHigh - lowestLow;
+      if (range <= 0 || sumTR <= 0) return 100;
 
-      for (let i = period + 1; i < prices.length; i++) {
-        const diff = prices[i] - prices[i - 1];
-        const g = diff > 0 ? diff : 0;
-        const l = diff < 0 ? -diff : 0;
-        avgGain = ((avgGain * (period - 1)) + g) / period;
-        avgLoss = ((avgLoss * (period - 1)) + l) / period;
-      }
-
-      if (avgLoss === 0) return 100;
-      const rs = avgGain / avgLoss;
-      return 100 - (100 / (1 + rs));
+      const chop = 100 * (Math.log10(sumTR / range) / Math.log10(period));
+      return Math.max(0, Math.min(100, chop));
     }
 
-    function analyzeCandles(closes) {
-      const rsi = calculateRSI(closes, 14);
-      const ema9 = calculateEMA(closes, 9);
-      const ema21 = calculateEMA(closes, 21);
-      const latestClose = closes[closes.length - 1];
+    /**
+     * Master 1m Blitz Signal Evaluation Engine
+     */
+    function evaluateBlitzSignal(candles) {
+      const closes = candles.map(c => c.close);
+      const n = candles.length;
+      const latest = candles[n - 1];
 
-      let direction = 'CALL';
-      let confidence = 70;
+      // 1. Compute ALMA Fast (7, 0.85, 6) & ALMA Slow (12, 0.85, 6)
+      const alma7Arr = calculateALMASeries(closes, 7, 0.85, 6);
+      const alma12Arr = calculateALMASeries(closes, 12, 0.85, 6);
 
-      if (rsi >= 68) {
-        direction = 'PUT';
-        confidence = Math.min(93, Math.round(70 + (rsi - 65) * 1.2));
-      } else if (rsi <= 32) {
-        direction = 'CALL';
-        confidence = Math.min(93, Math.round(70 + (35 - rsi) * 1.2));
-      } else if (ema9 > ema21) {
-        direction = 'CALL';
-        confidence = Math.min(89, Math.round(70 + Math.abs((ema9 - ema21) / ema21) * 80000));
-      } else {
-        direction = 'PUT';
-        confidence = Math.min(89, Math.round(70 + Math.abs((ema21 - ema9) / ema21) * 80000));
+      const alma7Now = alma7Arr[n - 1];
+      const alma12Now = alma12Arr[n - 1];
+      const alma7Prev1 = alma7Arr[n - 2];
+      const alma12Prev1 = alma12Arr[n - 2];
+      const alma7Prev2 = alma7Arr[n - 3];
+      const alma12Prev2 = alma12Arr[n - 3];
+
+      // 2. Compute Choppiness Index Period 2 (Overbought = 59.8, Oversold = 36.2)
+      const chop2 = calculateChoppinessIndex(candles, 2);
+
+      // 3. 30-Bar Support & Resistance Levels (excluding current candle's extreme to measure breakout room)
+      const lookbackCandles = candles.slice(0, n - 1);
+      const resistance30 = Math.max(...lookbackCandles.map(c => c.high));
+      const support30 = Math.min(...lookbackCandles.map(c => c.low));
+      const totalChannel = Math.max(0.00001, resistance30 - support30);
+
+      // Buffer zone: 8% of the 30-candle range to ensure price isn't blocked right at S/R
+      const srBuffer = totalChannel * 0.08;
+      const clearOfResistance = latest.close < (resistance30 - srBuffer);
+      const clearOfSupport = latest.close > (support30 + srBuffer);
+
+      // 4. Candle Strength & Direction Check
+      const fullRange = Math.max(0.000001, latest.high - latest.low);
+      const bodySize = Math.abs(latest.close - latest.open);
+      const bodyRatio = bodySize / fullRange; // Strong body >= 0.50 (50% of candle)
+
+      const isGreenStrong = (latest.close > latest.open) && (bodyRatio >= 0.50) && (latest.close > alma7Now);
+      const isRedStrong = (latest.close < latest.open) && (bodyRatio >= 0.50) && (latest.close < alma7Now);
+
+      // 5. Crossover Age Check (Within 1 to 2 bars max)
+      // Bullish cross within <= 2 bars: currently ALMA7 > ALMA12, and either 1 bar ago or 2 bars ago ALMA7 <= ALMA12
+      const bullishFreshCross = (alma7Now > alma12Now) &&
+        ((alma7Prev1 <= alma12Prev1) || (alma7Prev2 <= alma12Prev2));
+
+      // Bearish cross within <= 2 bars: currently ALMA7 < ALMA12, and either 1 bar ago or 2 bars ago ALMA7 >= ALMA12
+      const bearishFreshCross = (alma7Now < alma12Now) &&
+        ((alma7Prev1 >= alma12Prev1) || (alma7Prev2 >= alma12Prev2));
+
+      const indicatorLine = `ALMA7: ${alma7Now.toFixed(decimals)} | ALMA12: ${alma12Now.toFixed(decimals)} | CHOP(2): ${chop2.toFixed(1)}`;
+
+      // 6. Filter Gate 1: Sideway Market Check (CHOP >= 36.2)
+      if (chop2 >= 36.2) {
+        const sidewayType = chop2 >= 59.8 ? 'Extreme Chop/Overbought' : 'Sideway/Consolidation';
+        return {
+          status: 'WAIT',
+          confidence: Math.max(35, Math.round(68 - (chop2 - 36.2))),
+          chop2: chop2.toFixed(1),
+          indicatorLine,
+          filterNote: `CHOP(2) = ${chop2.toFixed(1)} ≥ 36.2 (${sidewayType})`
+        };
+      }
+
+      // 7. Evaluate CALL Setup
+      if (alma7Now > alma12Now) {
+        if (!bullishFreshCross) {
+          return {
+            status: 'WAIT',
+            confidence: 54,
+            chop2: chop2.toFixed(1),
+            indicatorLine,
+            filterNote: 'ALMA(7) crossed above ALMA(12) > 2 bars ago (Late entry)'
+          };
+        }
+        if (!isGreenStrong) {
+          return {
+            status: 'WAIT',
+            confidence: 58,
+            chop2: chop2.toFixed(1),
+            indicatorLine,
+            filterNote: 'Waiting for strong green candle close above ALMA(7)'
+          };
+        }
+        if (!clearOfResistance) {
+          return {
+            status: 'WAIT',
+            confidence: 52,
+            chop2: chop2.toFixed(1),
+            indicatorLine,
+            filterNote: `Blocked near 30-bar Resistance (${resistance30.toFixed(decimals)})`
+          };
+        }
+
+        // Valid High-Precision CALL
+        const trendScore = Math.min(12, Math.round((36.2 - chop2) * 0.45));
+        const bodyScore = Math.min(8, Math.round((bodyRatio - 0.5) * 16));
+        const confidence = Math.min(96, 78 + trendScore + bodyScore);
+
+        return {
+          status: 'CALL',
+          confidence,
+          chop2: chop2.toFixed(1),
+          indicatorLine,
+          filterNote: `Fresh ALMA(7/12) Bull Cross • Strong Body ${(bodyRatio * 100).toFixed(0)}% • Clear R30`
+        };
+      }
+
+      // 8. Evaluate PUT Setup
+      if (alma7Now < alma12Now) {
+        if (!bearishFreshCross) {
+          return {
+            status: 'WAIT',
+            confidence: 54,
+            chop2: chop2.toFixed(1),
+            indicatorLine,
+            filterNote: 'ALMA(7) crossed below ALMA(12) > 2 bars ago (Late entry)'
+          };
+        }
+        if (!isRedStrong) {
+          return {
+            status: 'WAIT',
+            confidence: 58,
+            chop2: chop2.toFixed(1),
+            indicatorLine,
+            filterNote: 'Waiting for strong red candle close below ALMA(7)'
+          };
+        }
+        if (!clearOfSupport) {
+          return {
+            status: 'WAIT',
+            confidence: 52,
+            chop2: chop2.toFixed(1),
+            indicatorLine,
+            filterNote: `Blocked near 30-bar Support (${support30.toFixed(decimals)})`
+          };
+        }
+
+        // Valid High-Precision PUT
+        const trendScore = Math.min(12, Math.round((36.2 - chop2) * 0.45));
+        const bodyScore = Math.min(8, Math.round((bodyRatio - 0.5) * 16));
+        const confidence = Math.min(96, 78 + trendScore + bodyScore);
+
+        return {
+          status: 'PUT',
+          confidence,
+          chop2: chop2.toFixed(1),
+          indicatorLine,
+          filterNote: `Fresh ALMA(7/12) Bear Cross • Strong Body ${(bodyRatio * 100).toFixed(0)}% • Clear S30`
+        };
       }
 
       return {
-        direction,
-        rsi: rsi.toFixed(1),
-        ema9: ema9.toFixed(decimals),
-        ema21: ema21.toFixed(decimals),
-        spotPrice: (currentLivePrice !== null ? currentLivePrice : latestClose).toFixed(decimals),
-        confidence,
-        summary: `RSI(14): ${rsi.toFixed(1)} | EMA9: ${ema9.toFixed(decimals)} | EMA21: ${ema21.toFixed(decimals)}`
+        status: 'WAIT',
+        confidence: 50,
+        chop2: chop2.toFixed(1),
+        indicatorLine,
+        filterNote: 'ALMA(7) & ALMA(12) converging • No clear directional cross'
       };
     }
 
-    // 5. Scan Button Execution & Countdown Timer
+    // =========================================================================
+    // 5. SCANNER EXECUTION & 5-SECOND BLITZ ENTRY COUNTDOWN
+    // =========================================================================
     let isScanning = false;
     let countdownInterval = null;
     let openSignals = 0;
@@ -1052,7 +1240,7 @@
       const btnText = document.getElementById('scanBtnText');
       const statusText = document.getElementById('statusText');
 
-      statusText.classList.remove('error');
+      statusText.classList.remove('error', 'wait');
       stage.classList.add('scanning');
       btn.disabled = true;
       btnText.textContent = 'SCANNING';
@@ -1060,25 +1248,28 @@
       try {
         // Step 1: Fetch 30 real candles from Twelve Data
         setStepState(0);
-        statusText.textContent = `Fetching 30 real ${currentIntervalStr} candles for ${currentPair}...`;
-        const closes = await fetch30Candles(currentPair, currentIntervalStr);
+        statusText.textContent = `Fetching 30 real ${currentIntervalStr} OHLC candles...`;
+        const candles = await fetch30OHLCCandles(currentPair, currentIntervalStr);
 
-        // Step 2: Calculate RSI(14) & EMA(9/21)
+        // Step 2: Calculate ALMA(7/12) & CHOP(2)
         setStepState(1);
-        statusText.textContent = 'Calculating RSI(14) & EMA(9/21) on real candles...';
-        await new Promise(r => setTimeout(r, 400));
+        statusText.textContent = 'Computing ALMA(7/12) & CHOP(2)...';
+        await new Promise(r => setTimeout(r, 300));
 
-        // Step 3: Analyze Direction
+        // Step 3: Validate S/R & Candle Strength
         setStepState(2);
-        statusText.textContent = 'Confirming real market trend & momentum...';
-        await new Promise(r => setTimeout(r, 400));
+        statusText.textContent = 'Filtering 30-bar S/R & candle momentum...';
+        await new Promise(r => setTimeout(r, 300));
 
-        const analysis = analyzeCandles(closes);
+        const result = evaluateBlitzSignal(candles);
+        const spotPrice = (currentLivePrice !== null ? currentLivePrice : candles[candles.length - 1].close).toFixed(decimals);
 
         // Step 4: Display Output
         setStepState(3);
-        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-        displaySignalCard(analysis);
+        if (tg && tg.HapticFeedback) {
+          tg.HapticFeedback.notificationOccurred(result.status === 'WAIT' ? 'warning' : 'success');
+        }
+        renderBlitzResult(result, spotPrice);
 
       } catch (err) {
         setStepState(-1);
@@ -1093,80 +1284,117 @@
       }
     });
 
-    function displaySignalCard(analysis) {
+    function renderBlitzResult(result, spotPrice) {
       const thNow = getThailandNow();
-      const entryDate = new Date(thNow.getTime());
-      entryDate.setSeconds(0, 0);
-      entryDate.setMinutes(entryDate.getMinutes() + 1);
-
+      // Blitz 1m Entry = 5 seconds from scan completion
+      const entryDate = new Date(thNow.getTime() + 5000);
       const entryStr = formatTime(entryDate);
 
-      document.getElementById('statusText').textContent =
-        `Signal ready: ${analysis.direction} on ${currentPair} REAL • ${currentTimeframe} min`;
-
+      const statusText = document.getElementById('statusText');
+      const card = document.getElementById('signalCard');
       const dirIcon = document.getElementById('dirIcon');
       const dirTitle = document.getElementById('dirTitle');
+      const dirSub = document.getElementById('dirSub');
+      const confEl = document.getElementById('confidenceVal');
+      const tfLabel = currentTimeframe === 1 ? '1 min (Blitz)' : `${currentTimeframe} min`;
 
-      if (analysis.direction === 'CALL') {
+      card.classList.remove('wait-mode');
+      statusText.classList.remove('wait', 'error');
+
+      // Confidence Color Highlight (>= 80% Green, < 80% Orange/Red)
+      confEl.classList.remove('conf-high', 'conf-mid', 'conf-low');
+      if (result.confidence >= 80) {
+        confEl.classList.add('conf-high');
+      } else if (result.confidence >= 60) {
+        confEl.classList.add('conf-mid');
+      } else {
+        confEl.classList.add('conf-low');
+      }
+
+      if (result.status === 'CALL') {
+        statusText.textContent = `Signal ready: CALL on ${currentPair} • ${tfLabel}`;
         dirIcon.className = 'dir-icon call';
         dirIcon.textContent = '↑';
         dirTitle.className = 'dir-title call';
         dirTitle.textContent = 'CALL';
-        document.getElementById('dirSub').textContent = `Higher • ${currentPair} REAL • ${currentTimeframe} min`;
-      } else {
+        dirSub.textContent = `Higher • ${currentPair} • ${tfLabel}`;
+        document.getElementById('outcomeActions').style.display = 'grid';
+        openSignals++;
+      } else if (result.status === 'PUT') {
+        statusText.textContent = `Signal ready: PUT on ${currentPair} • ${tfLabel}`;
         dirIcon.className = 'dir-icon put';
         dirIcon.textContent = '↓';
         dirTitle.className = 'dir-title put';
         dirTitle.textContent = 'PUT';
-        document.getElementById('dirSub').textContent = `Lower • ${currentPair} REAL • ${currentTimeframe} min`;
+        dirSub.textContent = `Lower • ${currentPair} • ${tfLabel}`;
+        document.getElementById('outcomeActions').style.display = 'grid';
+        openSignals++;
+      } else {
+        // WAIT / NO CLEAR SETUP (Yellow State)
+        statusText.classList.add('wait');
+        statusText.textContent = 'WAIT / NO CLEAR SETUP • Filtered out risky entry';
+        card.classList.add('wait-mode');
+        dirIcon.className = 'dir-icon wait';
+        dirIcon.textContent = '⏳';
+        dirTitle.className = 'dir-title wait';
+        dirTitle.textContent = 'WAIT / NO CLEAR SETUP';
+        dirSub.textContent = `Hold • ${currentPair} • ${tfLabel}`;
+        document.getElementById('outcomeActions').style.display = 'none';
       }
 
-      document.getElementById('entryTimeVal').textContent = entryStr;
-      document.getElementById('confidenceVal').textContent = `${analysis.confidence}%`;
-      document.getElementById('rsiReading').textContent = `RSI ${analysis.rsi}`;
-      document.getElementById('signalSpotPrice').textContent = analysis.spotPrice;
-      document.getElementById('reasonText').textContent = analysis.summary;
+      document.getElementById('entryTimeVal').textContent = result.status === 'WAIT' ? '--:--:--' : entryStr;
+      confEl.textContent = `${result.confidence}%`;
+      document.getElementById('chopReading').textContent = `CHOP ${result.chop2}`;
+      document.getElementById('signalSpotPrice').textContent = spotPrice;
+      document.getElementById('reasonText').innerHTML =
+        `${result.indicatorLine}<span class="filter-detail">${result.filterNote}</span>`;
 
-      const card = document.getElementById('signalCard');
       card.classList.add('visible');
-      document.getElementById('outcomeActions').style.display = 'grid';
-
-      openSignals++;
       updateSessionHeader();
 
+      // 5-Second Blitz Entry Countdown
       if (countdownInterval) clearInterval(countdownInterval);
       const timerEl = document.getElementById('countdownTimer');
       const labelEl = document.getElementById('countdownLabel');
 
-      function tickCountdown() {
+      if (result.status === 'WAIT') {
+        timerEl.textContent = 'HOLD';
+        timerEl.classList.remove('urgent');
+        labelEl.textContent = 'NO ENTRY';
+        return;
+      }
+
+      function tickBlitzCountdown() {
         const now = getThailandNow();
-        const diffSec = Math.floor((entryDate.getTime() - now.getTime()) / 1000);
+        const diffMs = entryDate.getTime() - now.getTime();
+        const diffSec = Math.ceil(diffMs / 1000);
 
         if (diffSec > 0) {
-          const mins = String(Math.floor(diffSec / 60)).padStart(2, '0');
-          const secs = String(diffSec % 60).padStart(2, '0');
-          timerEl.textContent = `${mins}:${secs}`;
-          timerEl.classList.toggle('urgent', diffSec <= 10);
+          timerEl.textContent = `00:0${diffSec}`;
+          timerEl.classList.add('urgent');
           labelEl.textContent = 'ENTRY IN';
         } else {
-          const expirySec = (currentTimeframe * 60) + diffSec;
-          if (expirySec > 0) {
-            const mins = String(Math.floor(expirySec / 60)).padStart(2, '0');
-            const secs = String(expirySec % 60).padStart(2, '0');
+          // Active 1-minute Blitz trade countdown (60 seconds from entry)
+          const elapsedAfterEntry = Math.floor((now.getTime() - entryDate.getTime()) / 1000);
+          const expiryRem = (currentTimeframe * 60) - elapsedAfterEntry;
+
+          if (expiryRem > 0) {
+            const mins = String(Math.floor(expiryRem / 60)).padStart(2, '0');
+            const secs = String(expiryRem % 60).padStart(2, '0');
             timerEl.textContent = `${mins}:${secs}`;
             timerEl.classList.add('urgent');
-            labelEl.textContent = 'EXPIRY IN';
+            labelEl.textContent = 'BLITZ LIVE';
           } else {
             timerEl.textContent = '00:00';
             timerEl.classList.remove('urgent');
-            labelEl.textContent = 'CLOSED';
+            labelEl.textContent = 'FINISHED';
             clearInterval(countdownInterval);
           }
         }
       }
 
-      tickCountdown();
-      countdownInterval = setInterval(tickCountdown, 500);
+      tickBlitzCountdown();
+      countdownInterval = setInterval(tickBlitzCountdown, 250);
     }
 
     // 6. Session Result Tracker

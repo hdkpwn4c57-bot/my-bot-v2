@@ -865,7 +865,7 @@
       if (!isAuthorized) return;
       const priceEl = document.getElementById('livePriceDisplay');
 
-      if (!API_KEY || API_KEY === '4cf8926373f6418b9cbf88c4c8ae7f32') {
+      if (!API_KEY || API_KEY === 'YOUR_API_KEY') {
         priceEl.className = 'live-price-tag price-err';
         priceEl.textContent = 'SET API KEY';
         setConnectionStatus('error', 'Please insert Twelve Data API_KEY');

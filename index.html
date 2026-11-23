@@ -765,17 +765,17 @@
   </div>
 
   <script>
-    const API_KEY = "YOUR_API_KEY";
+    // =========================================
+    // === ใส่ API KEY ตรงนี้ ===
+    const API_KEY = "4cf8926373f6418b9cbf88c4c8ae7f32";
+    // =========================================
 
-    // =========================================================================
-    // [ตั้งค่าระบบล็อกสิทธิ์เข้าใช้งานด้วย Telegram User ID (Whitelist)]
-    // =========================================================================
-    const ENABLE_WHITELIST = false; // เปลี่ยนเป็น true เมื่อต้องการเปิดระบบล็อกสิทธิ์เฉพาะ ID ด้านล่าง
+    // ระบบล็อกสิทธิ์เข้าใช้งานด้วย Telegram User ID (Whitelist)
+    const ENABLE_WHITELIST = true; // เปลี่ยนเป็น true เมื่อต้องการเปิดระบบล็อกสิทธิ์เฉพาะ ID ด้านล่าง
     const ALLOWED_TELEGRAM_IDS = [
-      123456789,
+      8163991612,
       987654321
     ];
-    // =========================================================================
 
     // 1. Initialize Telegram Web App & Check Whitelist
     const tg = window.Telegram && window.Telegram.WebApp;
@@ -865,10 +865,10 @@
       if (!isAuthorized) return;
       const priceEl = document.getElementById('livePriceDisplay');
 
-      if (!API_KEY || API_KEY === 'YOUR_API_KEY') {
+      if (!API_KEY) {
         priceEl.className = 'live-price-tag price-err';
-        priceEl.textContent = 'SET API KEY';
-        setConnectionStatus('error', 'Please insert Twelve Data API_KEY');
+        priceEl.textContent = 'NO API KEY';
+        setConnectionStatus('error', 'Missing API_KEY');
         return;
       }
 
@@ -892,8 +892,8 @@
 
     // Fetch 30 real historical candles when SCAN is pressed
     async function fetch30Candles(symbol, interval) {
-      if (!API_KEY || API_KEY === 'YOUR_API_KEY') {
-        throw new Error('Please set your Twelve Data API_KEY in <script>');
+      if (!API_KEY) {
+        throw new Error('Missing API_KEY');
       }
 
       const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=30&apikey=${encodeURIComponent(API_KEY.trim())}`;

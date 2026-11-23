@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>UAE Scanner - Real Market Signal Desk</title>
+  <title>UAE Scanner - Twelve Data Real Market</title>
   
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -22,9 +22,9 @@
       --accent-orange: #ff9500;
       --accent-orange-glow: rgba(255, 149, 0, 0.35);
       --green: #10b981;
-      --green-bg: rgba(16, 185, 129, 0.12);
+      --green-bg: rgba(16, 185, 129, 0.14);
       --red: #ef4444;
-      --red-bg: rgba(239, 68, 68, 0.12);
+      --red-bg: rgba(239, 68, 68, 0.14);
       --text-primary: #f8fafc;
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
@@ -47,6 +47,59 @@
       overflow-x: hidden;
     }
 
+    /* Whitelist Lock Screen */
+    .lock-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-main);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .lock-overlay.active { display: flex; }
+
+    .lock-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 28px 22px;
+      max-width: 360px;
+      width: 100%;
+    }
+
+    .lock-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin: 0 auto 14px;
+    }
+
+    .lock-box h2 { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+    .lock-box p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px; }
+
+    .user-id-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 10px;
+      color: var(--accent-orange);
+    }
+
+    /* Main Container */
     .app-container {
       width: 100%;
       max-width: 440px;
@@ -64,11 +117,7 @@
       padding-bottom: 4px;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .brand { display: flex; align-items: center; gap: 10px; }
 
     .brand-logo {
       width: 36px;
@@ -86,21 +135,36 @@
     .brand-text h1 {
       font-size: 15px;
       font-weight: 700;
-      letter-spacing: 0.2px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    .badge-live {
+    .api-badge {
       font-size: 9px;
-      font-weight: 700;
+      font-weight: 800;
       padding: 2px 6px;
       border-radius: 4px;
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--green);
-      border: 1px solid rgba(16, 185, 129, 0.3);
       letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .api-badge.live {
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .api-badge.error {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .api-badge.syncing {
+      background: rgba(255, 149, 0, 0.15);
+      color: var(--accent-orange);
+      border: 1px solid rgba(255, 149, 0, 0.35);
     }
 
     .brand-text span {
@@ -125,10 +189,7 @@
       gap: 5px;
     }
 
-    .clock-pill strong {
-      color: var(--text-primary);
-      font-weight: 700;
-    }
+    .clock-pill strong { color: var(--text-primary); font-weight: 700; }
 
     /* Asset Selector */
     .card {
@@ -146,11 +207,7 @@
       cursor: pointer;
     }
 
-    .asset-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .asset-left { display: flex; align-items: center; gap: 12px; }
 
     .asset-icon {
       width: 36px;
@@ -164,11 +221,7 @@
       font-size: 18px;
     }
 
-    .asset-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
+    .asset-meta { display: flex; flex-direction: column; gap: 2px; }
 
     .asset-market-type {
       font-size: 11px;
@@ -179,27 +232,20 @@
     }
 
     .market-dot {
-      width: 6px;
-      height: 6px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 6px var(--green);
+      background: var(--accent-orange);
     }
 
-    .asset-name-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .market-dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .market-dot.error { background: var(--red); box-shadow: 0 0 6px var(--red); }
 
-    .asset-name {
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-    }
+    .asset-name-row { display: flex; align-items: center; gap: 8px; }
+    .asset-name { font-size: 16px; font-weight: 700; letter-spacing: 0.3px; }
 
     .tag-real {
-      background: rgba(16, 185, 129, 0.15);
+      background: var(--green-bg);
       color: var(--green);
       font-size: 10px;
       font-weight: 800;
@@ -210,13 +256,19 @@
 
     .live-price-tag {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--accent-orange);
-      background: rgba(255, 149, 0, 0.1);
-      padding: 4px 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      background: var(--bg-card-inner);
+      padding: 5px 9px;
       border-radius: 8px;
-      border: 1px solid rgba(255, 149, 0, 0.25);
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
     }
+
+    .price-up { color: var(--green) !important; border-color: rgba(16, 185, 129, 0.5) !important; }
+    .price-down { color: var(--red) !important; border-color: rgba(239, 68, 68, 0.5) !important; }
+    .price-err { color: var(--red) !important; border-color: rgba(239, 68, 68, 0.5) !important; font-size: 11px; }
 
     select.hidden-select {
       position: absolute;
@@ -282,7 +334,6 @@
       inset: 0;
       border-radius: 50%;
       border: 1.5px dashed rgba(255, 149, 0, 0.35);
-      transition: transform 0.5s linear;
     }
 
     .radar-ring-arc {
@@ -294,20 +345,11 @@
       border-right-color: rgba(255, 149, 0, 0.4);
     }
 
-    .scanning .radar-ring-outer {
-      animation: spinReverse 8s linear infinite;
-    }
+    .scanning .radar-ring-outer { animation: spinReverse 8s linear infinite; }
+    .scanning .radar-ring-arc { animation: spin 1.4s linear infinite; }
 
-    .scanning .radar-ring-arc {
-      animation: spin 1.4s linear infinite;
-    }
-
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
-    }
-    @keyframes spinReverse {
-      100% { transform: rotate(-360deg); }
-    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes spinReverse { 100% { transform: rotate(-360deg); } }
 
     .scan-btn {
       width: 158px;
@@ -325,30 +367,14 @@
       cursor: pointer;
       position: relative;
       z-index: 2;
-      transition: transform 0.15s ease, box-shadow 0.2s ease;
+      transition: transform 0.15s ease;
     }
 
-    .scan-btn:active {
-      transform: scale(0.95);
-    }
+    .scan-btn:active { transform: scale(0.95); }
+    .scan-btn:disabled { cursor: not-allowed; filter: brightness(0.9); }
 
-    .scan-btn:disabled {
-      cursor: not-allowed;
-      filter: brightness(0.95);
-    }
-
-    .scan-btn svg {
-      width: 30px;
-      height: 30px;
-      stroke: #111215;
-      stroke-width: 2.2;
-    }
-
-    .scan-btn span {
-      font-size: 15px;
-      font-weight: 800;
-      letter-spacing: 2px;
-    }
+    .scan-btn svg { width: 30px; height: 30px; stroke: #111215; stroke-width: 2.2; }
+    .scan-btn span { font-size: 15px; font-weight: 800; letter-spacing: 2px; }
 
     .status-text {
       font-size: 13px;
@@ -357,14 +383,13 @@
       margin-bottom: 14px;
       text-align: center;
       min-height: 18px;
+      padding: 0 8px;
     }
 
+    .status-text.error { color: var(--red); }
+
     /* Progress Stepper */
-    .stepper {
-      width: 100%;
-      padding: 0 10px;
-      margin-bottom: 10px;
-    }
+    .stepper { width: 100%; padding: 0 10px; margin-bottom: 10px; }
 
     .step-track {
       display: flex;
@@ -414,10 +439,7 @@
       box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.2);
     }
 
-    .step-dot.done {
-      background: var(--accent-orange);
-      border-color: var(--accent-orange);
-    }
+    .step-dot.done { background: var(--accent-orange); border-color: var(--accent-orange); }
 
     .step-labels {
       display: flex;
@@ -428,19 +450,10 @@
       color: var(--text-muted);
     }
 
-    .step-labels span.active {
-      color: var(--accent-orange);
-    }
+    .step-labels span.active { color: var(--accent-orange); }
+    .step-labels span.done { color: var(--text-primary); }
 
-    .step-labels span.done {
-      color: var(--text-primary);
-    }
-
-    .feed-note {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
+    .feed-note { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
     /* Signal Result Card */
     .signal-card {
@@ -454,26 +467,15 @@
       animation: slideUp 0.3s ease;
     }
 
-    .signal-card.visible {
-      display: flex;
-    }
+    .signal-card.visible { display: flex; }
 
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .signal-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .signal-direction-wrap {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .signal-top { display: flex; align-items: center; justify-content: space-between; }
+    .signal-direction-wrap { display: flex; align-items: center; gap: 12px; }
 
     .dir-icon {
       width: 44px;
@@ -486,33 +488,13 @@
       font-weight: 800;
     }
 
-    .dir-icon.call {
-      background: var(--green-bg);
-      color: var(--green);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
+    .dir-icon.call { background: var(--green-bg); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .dir-icon.put { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.3); }
 
-    .dir-icon.put {
-      background: var(--red-bg);
-      color: var(--red);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    .dir-title {
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      line-height: 1.1;
-    }
-
+    .dir-title { font-size: 24px; font-weight: 800; letter-spacing: 0.5px; line-height: 1.1; }
     .dir-title.call { color: var(--green); }
     .dir-title.put { color: var(--red); }
-
-    .dir-sub {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 2px;
-    }
+    .dir-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 
     .countdown-box {
       background: var(--bg-card-inner);
@@ -530,17 +512,8 @@
       color: var(--text-primary);
     }
 
-    .countdown-time.urgent {
-      color: var(--accent-orange);
-    }
-
-    .countdown-label {
-      font-size: 9px;
-      font-weight: 700;
-      color: var(--text-muted);
-      letter-spacing: 0.6px;
-      margin-top: 2px;
-    }
+    .countdown-time.urgent { color: var(--accent-orange); }
+    .countdown-label { font-size: 9px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.6px; margin-top: 2px; }
 
     .signal-metrics {
       display: grid;
@@ -552,41 +525,22 @@
       text-align: center;
     }
 
-    .metric-label {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--text-muted);
-      letter-spacing: 0.6px;
-      margin-bottom: 4px;
-    }
-
-    .metric-val {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .metric-sub {
-      font-size: 10px;
-      color: var(--accent-orange);
-      margin-top: 2px;
-    }
+    .metric-label { font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.6px; margin-bottom: 4px; }
+    .metric-val { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .metric-sub { font-size: 10px; color: var(--accent-orange); margin-top: 2px; }
 
     .indicator-reason {
       text-align: center;
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-secondary);
       background: var(--bg-card-inner);
-      padding: 8px 10px;
+      padding: 9px 10px;
       border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.5;
     }
 
-    .outcome-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
+    .outcome-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
     .btn-outcome {
       border: none;
@@ -595,22 +549,10 @@
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
-      transition: opacity 0.2s;
     }
 
-    .btn-outcome:active { opacity: 0.8; }
-
-    .btn-win {
-      background: var(--green-bg);
-      color: var(--green);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-    }
-
-    .btn-loss {
-      background: var(--red-bg);
-      color: var(--red);
-      border: 1px solid rgba(239, 68, 68, 0.35);
-    }
+    .btn-win { background: var(--green-bg); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.35); }
+    .btn-loss { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.35); }
 
     /* Session Results */
     .session-card {
@@ -620,81 +562,39 @@
       padding: 14px;
     }
 
-    .session-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
+    .session-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .session-title { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; color: var(--text-secondary); }
+    .session-status { font-size: 11px; color: var(--text-muted); }
 
-    .session-title {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.8px;
-      color: var(--text-secondary);
-    }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .stat-box { border-radius: 12px; padding: 12px 8px; text-align: center; }
+    .stat-box.wins { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); }
+    .stat-box.losses { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); }
+    .stat-box.rate { background: rgba(255, 149, 0, 0.08); border: 1px solid rgba(255, 149, 0, 0.25); }
 
-    .session-status {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .stat-box {
-      border-radius: 12px;
-      padding: 12px 8px;
-      text-align: center;
-    }
-
-    .stat-box.wins {
-      background: rgba(16, 185, 129, 0.08);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-    }
-
-    .stat-box.losses {
-      background: rgba(239, 68, 68, 0.08);
-      border: 1px solid rgba(239, 68, 68, 0.25);
-    }
-
-    .stat-box.rate {
-      background: rgba(255, 149, 0, 0.08);
-      border: 1px solid rgba(255, 149, 0, 0.25);
-    }
-
-    .stat-num {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 24px;
-      font-weight: 800;
-      margin-bottom: 4px;
-    }
-
+    .stat-num { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 800; margin-bottom: 4px; }
     .stat-box.wins .stat-num { color: var(--green); }
     .stat-box.losses .stat-num { color: var(--red); }
     .stat-box.rate .stat-num { color: var(--accent-orange); }
+    .stat-label { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; color: var(--text-secondary); }
 
-    .stat-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.6px;
-      color: var(--text-secondary);
-    }
-
-    .footer-note {
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
+    .footer-note { text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 2px; }
   </style>
 </head>
 <body>
 
-  <div class="app-container">
+  <!-- Whitelist Access Denied Screen -->
+  <div class="lock-overlay" id="lockOverlay">
+    <div class="lock-box">
+      <div class="lock-icon">🔒</div>
+      <h2>Access Restricted</h2>
+      <p>Your Telegram account is not authorized to use <strong>UAE Scanner</strong>. Contact Admin with your ID below.</p>
+      <div class="user-id-badge" id="lockedUserIdText">Telegram ID: Unknown</div>
+    </div>
+  </div>
+
+  <!-- Main Scanner App -->
+  <div class="app-container" id="mainApp">
     <!-- Top Header -->
     <header class="header">
       <div class="brand">
@@ -705,7 +605,7 @@
           </svg>
         </div>
         <div class="brand-text">
-          <h1>UAE Scanner <span class="badge-live">REAL MARKET</span></h1>
+          <h1>UAE Scanner <span class="api-badge syncing" id="apiStatusBadge">SYNCING</span></h1>
           <span>SIGNAL DESK</span>
         </div>
       </div>
@@ -716,14 +616,14 @@
       </div>
     </header>
 
-    <!-- Asset Selector (Real Market Only - Non-OTC) -->
+    <!-- Asset Selector -->
     <div class="card asset-selector">
       <div class="asset-left">
         <div class="asset-icon" id="assetFlag">🇪🇺🇺🇸</div>
         <div class="asset-meta">
           <div class="asset-market-type">
             <span class="market-dot" id="marketDot"></span>
-            <span id="marketStatusText">Real Forex Spot • Live Feed</span>
+            <span id="marketStatusText">Connecting Twelve Data...</span>
           </div>
           <div class="asset-name-row">
             <span class="asset-name" id="selectedPairName">EUR/USD</span>
@@ -733,29 +633,26 @@
       </div>
 
       <div style="display:flex; align-items:center; gap:8px;">
-        <span class="live-price-tag" id="livePriceDisplay">1.08420</span>
+        <span class="live-price-tag" id="livePriceDisplay">--.-----</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
 
-      <select id="pairSelect" class="hidden-select" aria-label="Select Real Market Pair">
-        <option value="EUR/USD" data-flag="🇪🇺🇺🇸" data-base="1.08420" data-decimals="5">EUR/USD (Real Forex)</option>
-        <option value="GBP/USD" data-flag="🇬🇧🇺🇸" data-base="1.26750" data-decimals="5">GBP/USD (Real Forex)</option>
-        <option value="USD/JPY" data-flag="🇺🇸🇯🇵" data-base="154.320" data-decimals="3">USD/JPY (Real Forex)</option>
-        <option value="AUD/USD" data-flag="🇦🇺🇺🇸" data-base="0.65480" data-decimals="5">AUD/USD (Real Forex)</option>
-        <option value="USD/CHF" data-flag="🇺🇸🇨🇭" data-base="0.88140" data-decimals="5">USD/CHF (Real Forex)</option>
-        <option value="EUR/JPY" data-flag="🇪🇺🇯🇵" data-base="167.310" data-decimals="3">EUR/JPY (Real Forex)</option>
-        <option value="XAU/USD" data-flag="🥇🇺🇸" data-base="2645.50" data-decimals="2">XAU/USD Gold (Spot)</option>
+      <select id="pairSelect" class="hidden-select" aria-label="Select Real Forex Pair">
+        <option value="EUR/USD" data-flag="🇪🇺🇺🇸" data-decimals="5">EUR/USD (Real Forex)</option>
+        <option value="GBP/USD" data-flag="🇬🇧🇺🇸" data-decimals="5">GBP/USD (Real Forex)</option>
+        <option value="USD/JPY" data-flag="🇺🇸🇯🇵" data-decimals="3">USD/JPY (Real Forex)</option>
+        <option value="AUD/CAD" data-flag="🇦🇺🇨🇦" data-decimals="5">AUD/CAD (Real Forex)</option>
       </select>
     </div>
 
     <!-- Timeframe Selector -->
     <div class="tf-grid" id="tfSelector">
-      <button class="tf-btn active" data-tf="1">1m</button>
-      <button class="tf-btn" data-tf="3">3m</button>
-      <button class="tf-btn" data-tf="5">5m</button>
-      <button class="tf-btn" data-tf="15">15m</button>
+      <button class="tf-btn active" data-tf="1" data-interval="1min">1m</button>
+      <button class="tf-btn" data-tf="3" data-interval="3min">3m</button>
+      <button class="tf-btn" data-tf="5" data-interval="5min">5m</button>
+      <button class="tf-btn" data-tf="15" data-interval="15min">15m</button>
     </div>
 
     <!-- Center Radar & Scan Trigger -->
@@ -773,7 +670,7 @@
         </button>
       </div>
 
-      <div class="status-text" id="statusText">Ready to scan real interbank liquidity</div>
+      <div class="status-text" id="statusText">Ready to scan real Twelve Data candles</div>
 
       <!-- 4-Stage Analysis Stepper -->
       <div class="stepper">
@@ -793,7 +690,7 @@
         </div>
       </div>
 
-      <div class="feed-note">Real-time Interbank Spot Feed • No OTC</div>
+      <div class="feed-note">Twelve Data Live Feed • 10s Interval • No OTC</div>
     </section>
 
     <!-- Signal Output Box -->
@@ -825,14 +722,14 @@
           <div class="metric-sub" id="rsiReading">RSI --</div>
         </div>
         <div>
-          <div class="metric-label">MARTINGALE</div>
-          <div class="metric-val">1 step</div>
-          <div class="metric-sub">Next candle</div>
+          <div class="metric-label">MARKET PRICE</div>
+          <div class="metric-val" id="signalSpotPrice">--</div>
+          <div class="metric-sub">Real Quote</div>
         </div>
       </div>
 
       <div class="indicator-reason" id="reasonText">
-        Analyzing EMA(9/21) & RSI(14) momentum...
+        RSI(14): -- | EMA9: -- | EMA21: --
       </div>
 
       <div class="outcome-actions" id="outcomeActions">
@@ -864,11 +761,23 @@
       </div>
     </section>
 
-    <div class="footer-note">Real market price action scanner • Trade responsibly</div>
+    <div class="footer-note">Powered by Twelve Data Real-Time API</div>
   </div>
 
   <script>
-    // 1. Initialize Telegram Web App (Full Screen & Theme)
+    const API_KEY = "YOUR_API_KEY";
+
+    // =========================================================================
+    // [ตั้งค่าระบบล็อกสิทธิ์เข้าใช้งานด้วย Telegram User ID (Whitelist)]
+    // =========================================================================
+    const ENABLE_WHITELIST = false; // เปลี่ยนเป็น true เมื่อต้องการเปิดระบบล็อกสิทธิ์เฉพาะ ID ด้านล่าง
+    const ALLOWED_TELEGRAM_IDS = [
+      123456789,
+      987654321
+    ];
+    // =========================================================================
+
+    // 1. Initialize Telegram Web App & Check Whitelist
     const tg = window.Telegram && window.Telegram.WebApp;
     if (tg) {
       tg.ready();
@@ -876,6 +785,23 @@
       if (tg.setHeaderColor) tg.setHeaderColor('#0c0d10');
       if (tg.setBackgroundColor) tg.setBackgroundColor('#0c0d10');
     }
+
+    function verifyWhitelistAccess() {
+      if (!ENABLE_WHITELIST) return true;
+      const user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+      const userId = user ? user.id : null;
+
+      if (!userId || !ALLOWED_TELEGRAM_IDS.includes(Number(userId))) {
+        document.getElementById('lockOverlay').classList.add('active');
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('lockedUserIdText').textContent =
+          `Telegram ID: ${userId ? userId : 'Not opened inside Telegram'}`;
+        return false;
+      }
+      return true;
+    }
+
+    const isAuthorized = verifyWhitelistAccess();
 
     // 2. Real-Time Thailand Clock (GMT+7)
     function getThailandNow() {
@@ -891,89 +817,117 @@
       return `${h}:${m}:${s}`;
     }
 
-    function updateClockAndMarketStatus() {
-      const thNow = getThailandNow();
-      document.getElementById('liveClock').textContent = formatTime(thNow);
-
-      // Check real Forex market weekend closure (Sat 04:00 TH to Mon 04:00 TH)
-      const day = thNow.getDay(); // 0 = Sun, 6 = Sat
-      const hour = thNow.getHours();
-      const isWeekendClosed = (day === 6 && hour >= 4) || (day === 0) || (day === 1 && hour < 4);
-
-      const dot = document.getElementById('marketDot');
-      const statusTxt = document.getElementById('marketStatusText');
-      if (isWeekendClosed) {
-        dot.style.background = '#f59e0b';
-        dot.style.boxShadow = '0 0 6px #f59e0b';
-        statusTxt.textContent = 'Real Forex • Weekend Session Closed';
-      } else {
-        dot.style.background = '#10b981';
-        dot.style.boxShadow = '0 0 6px #10b981';
-        statusTxt.textContent = 'Real Forex Spot • Live Feed';
-      }
+    function updateClock() {
+      document.getElementById('liveClock').textContent = formatTime(getThailandNow());
     }
-    setInterval(updateClockAndMarketStatus, 1000);
-    updateClockAndMarketStatus();
+    setInterval(updateClock, 1000);
+    updateClock();
 
-    // 3. Real Market Live Price Feed & Price History Buffer (for Technical Analysis)
+    // 3. Twelve Data Real-Time Price & 30-Candle Engine
     let currentPair = 'EUR/USD';
     let currentTimeframe = 1;
-    let basePrice = 1.08420;
+    let currentIntervalStr = '1min';
     let decimals = 5;
-    let priceHistory = [];
+    let currentLivePrice = null;
+    let previousLivePrice = null;
 
-    function seedPriceHistory(startPrice) {
-      priceHistory = [];
-      let p = startPrice;
-      for (let i = 0; i < 30; i++) {
-        const volatility = startPrice * 0.00018;
-        p += (Math.random() - 0.5) * volatility;
-        priceHistory.push(p);
-      }
+    function setConnectionStatus(state, message) {
+      const badge = document.getElementById('apiStatusBadge');
+      const dot = document.getElementById('marketDot');
+      const statusTxt = document.getElementById('marketStatusText');
+
+      badge.className = `api-badge ${state}`;
+      dot.className = `market-dot ${state}`;
+
+      if (state === 'live') badge.textContent = 'LIVE';
+      else if (state === 'error') badge.textContent = 'API ERROR';
+      else badge.textContent = 'SYNCING';
+
+      statusTxt.textContent = message;
     }
 
-    // Fetch real spot rate from open FX API when pair changes
-    async function fetchRealFxRate(pair) {
+    function updatePriceDisplay(priceNum) {
+      const priceEl = document.getElementById('livePriceDisplay');
+      priceEl.classList.remove('price-up', 'price-down', 'price-err');
+
+      if (previousLivePrice !== null) {
+        if (priceNum > previousLivePrice) priceEl.classList.add('price-up');
+        else if (priceNum < previousLivePrice) priceEl.classList.add('price-down');
+      }
+
+      previousLivePrice = priceNum;
+      currentLivePrice = priceNum;
+      priceEl.textContent = priceNum.toFixed(decimals);
+    }
+
+    // Fetch live price every 10 seconds from Twelve Data (<= 6 requests/min)
+    async function fetchRealTimePrice() {
+      if (!isAuthorized) return;
+      const priceEl = document.getElementById('livePriceDisplay');
+
+      if (!API_KEY || API_KEY === '4cf8926373f6418b9cbf88c4c8ae7f32') {
+        priceEl.className = 'live-price-tag price-err';
+        priceEl.textContent = 'SET API KEY';
+        setConnectionStatus('error', 'Please insert Twelve Data API_KEY');
+        return;
+      }
+
       try {
-        const [base, quote] = pair.split('/');
-        if (base === 'XAU') return; // Keep spot gold base
-        const res = await fetch(`https://open.er-api.com/v6/latest/${base}`);
-        const data = await res.json();
-        if (data && data.rates && data.rates[quote]) {
-          basePrice = data.rates[quote];
-          seedPriceHistory(basePrice);
+        const url = `https://api.twelvedata.com/price?symbol=${encodeURIComponent(currentPair)}&apikey=${encodeURIComponent(API_KEY.trim())}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data && data.price) {
+          updatePriceDisplay(parseFloat(data.price));
+          setConnectionStatus('live', 'Twelve Data Live • 10s Update');
+        } else {
+          throw new Error(data.message || 'Invalid API response');
         }
-      } catch (e) {
-        // Fallback to realistic spot base if offline
+      } catch (err) {
+        priceEl.className = 'live-price-tag price-err';
+        priceEl.textContent = 'API ERROR';
+        setConnectionStatus('error', err.message);
       }
     }
 
-    seedPriceHistory(basePrice);
-    fetchRealFxRate(currentPair);
+    // Fetch 30 real historical candles when SCAN is pressed
+    async function fetch30Candles(symbol, interval) {
+      if (!API_KEY || API_KEY === 'YOUR_API_KEY') {
+        throw new Error('Please set your Twelve Data API_KEY in <script>');
+      }
 
-    // Live micro-tick generator simulating real interbank bid/ask movement
-    setInterval(() => {
-      const last = priceHistory[priceHistory.length - 1] || basePrice;
-      const tickSize = basePrice * 0.00006;
-      const nextPrice = last + (Math.random() - 0.495) * tickSize;
-      priceHistory.push(nextPrice);
-      if (priceHistory.length > 50) priceHistory.shift();
+      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=30&apikey=${encodeURIComponent(API_KEY.trim())}`;
+      const response = await fetch(url);
+      const data = await response.json();
 
-      document.getElementById('livePriceDisplay').textContent = nextPrice.toFixed(decimals);
-    }, 900);
+      if (!data || !data.values || !Array.isArray(data.values)) {
+        throw new Error(data.message || 'Failed to fetch 30 candles from Twelve Data');
+      }
+
+      // Reverse array to chronological order (oldest -> newest)
+      return data.values.map(candle => parseFloat(candle.close)).reverse();
+    }
+
+    // Start 10-second live price polling
+    if (isAuthorized) {
+      fetchRealTimePrice();
+      setInterval(fetchRealTimePrice, 10000);
+    }
 
     // Pair Selection Handler
-    const pairSelect = document.getElementById('pairSelect');
-    pairSelect.addEventListener('change', (e) => {
+    document.getElementById('pairSelect').addEventListener('change', (e) => {
       const opt = e.target.selectedOptions[0];
       currentPair = opt.value;
-      basePrice = parseFloat(opt.dataset.base);
       decimals = parseInt(opt.dataset.decimals, 10);
+      currentLivePrice = null;
+      previousLivePrice = null;
 
       document.getElementById('assetFlag').textContent = opt.dataset.flag;
       document.getElementById('selectedPairName').textContent = currentPair;
-      seedPriceHistory(basePrice);
-      fetchRealFxRate(currentPair);
+      document.getElementById('livePriceDisplay').textContent = '--.-----';
+      setConnectionStatus('syncing', `Loading ${currentPair}...`);
+
+      fetchRealTimePrice();
       if (tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
     });
 
@@ -983,57 +937,84 @@
         document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentTimeframe = parseInt(btn.dataset.tf, 10);
+        currentIntervalStr = btn.dataset.interval;
         if (tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
       });
     });
 
-    // 4. Real Technical Indicator Calculations (RSI-14 & EMA-9/21)
-    function calculateIndicators(prices) {
-      // Calculate RSI (14)
-      let gains = 0, losses = 0;
-      const period = Math.min(14, prices.length - 1);
-      for (let i = prices.length - period; i < prices.length; i++) {
+    // 4. Real Technical Indicator Calculations (Wilder's RSI-14 & EMA-9 / EMA-21)
+    function calculateEMA(prices, period) {
+      const k = 2 / (period + 1);
+      let ema = prices[0];
+      for (let i = 1; i < prices.length; i++) {
+        ema = (prices[i] * k) + (ema * (1 - k));
+      }
+      return ema;
+    }
+
+    function calculateRSI(prices, period = 14) {
+      if (prices.length <= period) return 50;
+
+      let gains = 0;
+      let losses = 0;
+
+      for (let i = 1; i <= period; i++) {
         const diff = prices[i] - prices[i - 1];
         if (diff >= 0) gains += diff;
         else losses -= diff;
       }
-      const avgGain = gains / period;
-      const avgLoss = losses / period || 0.000001;
-      const rs = avgGain / avgLoss;
-      const rsi = Math.round(100 - (100 / (1 + rs)));
 
-      // Calculate Short vs Long Moving Average (Momentum)
-      const shortSlice = prices.slice(-5);
-      const longSlice = prices.slice(-15);
-      const emaShort = shortSlice.reduce((a, b) => a + b, 0) / shortSlice.length;
-      const emaLong = longSlice.reduce((a, b) => a + b, 0) / longSlice.length;
+      let avgGain = gains / period;
+      let avgLoss = losses / period;
 
-      let direction = 'CALL';
-      let reason = '';
-      let confidence = 72;
-
-      if (rsi >= 65) {
-        direction = 'PUT';
-        reason = `RSI(${rsi}) overbought zone, bearish rejection`;
-        confidence = Math.min(92, 68 + (rsi - 60));
-      } else if (rsi <= 35) {
-        direction = 'CALL';
-        reason = `RSI(${rsi}) oversold bounce, bullish support`;
-        confidence = Math.min(92, 68 + (40 - rsi));
-      } else if (emaShort > emaLong) {
-        direction = 'CALL';
-        reason = `RSI(${rsi}) neutral-bullish, EMA(9) above EMA(21)`;
-        confidence = Math.floor(68 + Math.random() * 14);
-      } else {
-        direction = 'PUT';
-        reason = `RSI(${rsi}) neutral-bearish, trend down`;
-        confidence = Math.floor(68 + Math.random() * 14);
+      for (let i = period + 1; i < prices.length; i++) {
+        const diff = prices[i] - prices[i - 1];
+        const g = diff > 0 ? diff : 0;
+        const l = diff < 0 ? -diff : 0;
+        avgGain = ((avgGain * (period - 1)) + g) / period;
+        avgLoss = ((avgLoss * (period - 1)) + l) / period;
       }
 
-      return { direction, rsi, confidence, reason };
+      if (avgLoss === 0) return 100;
+      const rs = avgGain / avgLoss;
+      return 100 - (100 / (1 + rs));
     }
 
-    // 5. Scanner Animation, Entry Calculation & Countdown Timer
+    function analyzeCandles(closes) {
+      const rsi = calculateRSI(closes, 14);
+      const ema9 = calculateEMA(closes, 9);
+      const ema21 = calculateEMA(closes, 21);
+      const latestClose = closes[closes.length - 1];
+
+      let direction = 'CALL';
+      let confidence = 70;
+
+      if (rsi >= 68) {
+        direction = 'PUT';
+        confidence = Math.min(93, Math.round(70 + (rsi - 65) * 1.2));
+      } else if (rsi <= 32) {
+        direction = 'CALL';
+        confidence = Math.min(93, Math.round(70 + (35 - rsi) * 1.2));
+      } else if (ema9 > ema21) {
+        direction = 'CALL';
+        confidence = Math.min(89, Math.round(70 + Math.abs((ema9 - ema21) / ema21) * 80000));
+      } else {
+        direction = 'PUT';
+        confidence = Math.min(89, Math.round(70 + Math.abs((ema21 - ema9) / ema21) * 80000));
+      }
+
+      return {
+        direction,
+        rsi: rsi.toFixed(1),
+        ema9: ema9.toFixed(decimals),
+        ema21: ema21.toFixed(decimals),
+        spotPrice: (currentLivePrice !== null ? currentLivePrice : latestClose).toFixed(decimals),
+        confidence,
+        summary: `RSI(14): ${rsi.toFixed(1)} | EMA9: ${ema9.toFixed(decimals)} | EMA21: ${ema21.toFixed(decimals)}`
+      };
+    }
+
+    // 5. Scan Button Execution & Countdown Timer
     let isScanning = false;
     let countdownInterval = null;
     let openSignals = 0;
@@ -1060,8 +1041,8 @@
       }
     }
 
-    document.getElementById('scanBtn').addEventListener('click', () => {
-      if (isScanning) return;
+    document.getElementById('scanBtn').addEventListener('click', async () => {
+      if (isScanning || !isAuthorized) return;
       isScanning = true;
 
       if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
@@ -1071,44 +1052,49 @@
       const btnText = document.getElementById('scanBtnText');
       const statusText = document.getElementById('statusText');
 
+      statusText.classList.remove('error');
       stage.classList.add('scanning');
       btn.disabled = true;
       btnText.textContent = 'SCANNING';
 
-      // Step 1: Market Liquidity
-      setStepState(0);
-      statusText.textContent = `Connecting ${currentPair} real spot liquidity...`;
+      try {
+        // Step 1: Fetch 30 real candles from Twelve Data
+        setStepState(0);
+        statusText.textContent = `Fetching 30 real ${currentIntervalStr} candles for ${currentPair}...`;
+        const closes = await fetch30Candles(currentPair, currentIntervalStr);
 
-      setTimeout(() => {
-        // Step 2: Indicators
+        // Step 2: Calculate RSI(14) & EMA(9/21)
         setStepState(1);
         statusText.textContent = 'Calculating RSI(14) & EMA(9/21) on real candles...';
-      }, 700);
+        await new Promise(r => setTimeout(r, 400));
 
-      setTimeout(() => {
-        // Step 3: Analysis
+        // Step 3: Analyze Direction
         setStepState(2);
-        statusText.textContent = 'Analyzing orderbook & price action...';
-      }, 1450);
+        statusText.textContent = 'Confirming real market trend & momentum...';
+        await new Promise(r => setTimeout(r, 400));
 
-      setTimeout(() => {
-        // Step 4: Signal Ready
+        const analysis = analyzeCandles(closes);
+
+        // Step 4: Display Output
         setStepState(3);
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        displaySignalCard(analysis);
+
+      } catch (err) {
+        setStepState(-1);
+        statusText.classList.add('error');
+        statusText.textContent = `API ERROR: ${err.message}`;
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+      } finally {
         stage.classList.remove('scanning');
         btn.disabled = false;
         btnText.textContent = 'SCAN';
         isScanning = false;
-
-        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-
-        const analysis = calculateIndicators(priceHistory);
-        displaySignal(analysis);
-      }, 2200);
+      }
     });
 
-    function displaySignal(analysis) {
+    function displaySignalCard(analysis) {
       const thNow = getThailandNow();
-      // Entry time is the start of the next exact minute candle
       const entryDate = new Date(thNow.getTime());
       entryDate.setSeconds(0, 0);
       entryDate.setMinutes(entryDate.getMinutes() + 1);
@@ -1138,7 +1124,8 @@
       document.getElementById('entryTimeVal').textContent = entryStr;
       document.getElementById('confidenceVal').textContent = `${analysis.confidence}%`;
       document.getElementById('rsiReading').textContent = `RSI ${analysis.rsi}`;
-      document.getElementById('reasonText').textContent = analysis.reason;
+      document.getElementById('signalSpotPrice').textContent = analysis.spotPrice;
+      document.getElementById('reasonText').textContent = analysis.summary;
 
       const card = document.getElementById('signalCard');
       card.classList.add('visible');
@@ -1147,12 +1134,11 @@
       openSignals++;
       updateSessionHeader();
 
-      // Start Real-Time Countdown to Entry Candle
       if (countdownInterval) clearInterval(countdownInterval);
       const timerEl = document.getElementById('countdownTimer');
       const labelEl = document.getElementById('countdownLabel');
 
-      function updateCountdown() {
+      function tickCountdown() {
         const now = getThailandNow();
         const diffSec = Math.floor((entryDate.getTime() - now.getTime()) / 1000);
 
@@ -1163,28 +1149,27 @@
           timerEl.classList.toggle('urgent', diffSec <= 10);
           labelEl.textContent = 'ENTRY IN';
         } else {
-          // Trade active countdown
           const expirySec = (currentTimeframe * 60) + diffSec;
           if (expirySec > 0) {
             const mins = String(Math.floor(expirySec / 60)).padStart(2, '0');
             const secs = String(expirySec % 60).padStart(2, '0');
             timerEl.textContent = `${mins}:${secs}`;
             timerEl.classList.add('urgent');
-            labelEl.textContent = 'ACTIVE TRADE';
+            labelEl.textContent = 'EXPIRY IN';
           } else {
             timerEl.textContent = '00:00';
             timerEl.classList.remove('urgent');
-            labelEl.textContent = 'EXPIRED';
+            labelEl.textContent = 'CLOSED';
             clearInterval(countdownInterval);
           }
         }
       }
 
-      updateCountdown();
-      countdownInterval = setInterval(updateCountdown, 500);
+      tickCountdown();
+      countdownInterval = setInterval(tickCountdown, 500);
     }
 
-    // 6. Session Result Tracking
+    // 6. Session Result Tracker
     function updateSessionHeader() {
       const total = wins + losses;
       if (openSignals > 0) {

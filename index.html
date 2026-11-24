@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GOLD (GC=F) AI Signal Scanner</title>
+    <title>XAU/USD AI Signal Scanner</title>
+    <!-- สคริปต์ Telegram WebApp SDK สำหรับเปิดแบบเต็มจอบน Telegram -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-main: #0d0e12;
             --bg-card: #16181f;
             --bg-card-inner: #1e212b;
-            --accent-orange: #ff9800;
-            --accent-orange-glow: rgba(255, 152, 0, 0.35);
+            --accent: #ff9800;
+            --accent-glow: rgba(255, 152, 0, 0.35);
+            --buy-color: #00e676;
+            --buy-bg: rgba(0, 230, 118, 0.12);
+            --sell-color: #ff3d57;
+            --sell-bg: rgba(255, 61, 87, 0.12);
             --text-primary: #f3f4f6;
             --text-secondary: #9ca3af;
-            --buy-green: #00e676;
-            --buy-bg: rgba(0, 230, 118, 0.14);
-            --sell-red: #ff3d57;
-            --sell-bg: rgba(255, 61, 87, 0.14);
-            --border-subtle: rgba(255, 255, 255, 0.07);
+            --border-color: #262936;
         }
 
         * {
@@ -32,12 +33,12 @@
         body {
             background-color: var(--bg-main);
             color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
+            font-family: 'Prompt', sans-serif;
             min-height: 100vh;
+            padding: 14px 14px 32px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 16px 14px 28px;
         }
 
         .container {
@@ -48,15 +49,15 @@
             gap: 14px;
         }
 
-        /* Header & Clock */
-        .header-bar {
+        /* Header & Live Clock */
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: var(--bg-card);
-            padding: 12px 16px;
+            border: 1px solid var(--border-color);
             border-radius: 14px;
-            border: 1px solid var(--border-subtle);
+            padding: 12px 16px;
         }
 
         .brand {
@@ -65,30 +66,39 @@
             gap: 8px;
         }
 
-        .brand-dot {
-            width: 10px;
-            height: 10px;
+        .live-dot {
+            width: 9px;
+            height: 9px;
+            background-color: var(--buy-color);
             border-radius: 50%;
-            background: var(--accent-orange);
-            box-shadow: 0 0 10px var(--accent-orange);
+            box-shadow: 0 0 8px var(--buy-color);
+            animation: pulseDot 1.5s infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
         }
 
         .brand-title {
-            font-family: 'Chakra Petch', sans-serif;
             font-weight: 700;
             font-size: 16px;
             letter-spacing: 0.5px;
         }
 
+        .brand-title span {
+            color: var(--accent);
+        }
+
         .clock-box {
             text-align: right;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         .clock-time {
-            font-family: 'Chakra Petch', sans-serif;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
-            color: var(--accent-orange);
+            color: var(--accent);
         }
 
         .clock-zone {
@@ -96,82 +106,63 @@
             color: var(--text-secondary);
         }
 
-        /* Live Price Card */
-        .price-card {
+        /* Price Ticker Card */
+        .ticker-card {
             background: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 16px;
-            border: 1px solid var(--border-subtle);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .pair-info h2 {
-            font-family: 'Chakra Petch', sans-serif;
             font-size: 20px;
             font-weight: 700;
-            color: #ffffff;
+            color: #fff;
         }
 
-        .pair-info span {
+        .pair-info p {
             font-size: 12px;
             color: var(--text-secondary);
         }
 
-        .live-price-box {
+        .price-display {
             text-align: right;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         .live-price {
-            font-family: 'Chakra Petch', sans-serif;
             font-size: 26px;
-            font-weight: 700;
-            color: var(--accent-orange);
-            letter-spacing: 0.5px;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: -0.5px;
         }
 
-        .live-status {
+        .price-status {
             font-size: 11px;
-            color: var(--buy-green);
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 5px;
-            margin-top: 2px;
-        }
-
-        .pulse-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--buy-green);
-            border-radius: 50%;
-            animation: blink 1.4s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.25; }
+            color: var(--buy-color);
         }
 
         /* Timeframe Selector */
-        .tf-selector {
+        .tf-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
             background: var(--bg-card);
             padding: 6px;
             border-radius: 14px;
-            border: 1px solid var(--border-subtle);
+            border: 1px solid var(--border-color);
         }
 
         .tf-btn {
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            font-family: 'Chakra Petch', sans-serif;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
             font-size: 14px;
-            font-weight: 600;
             padding: 10px 0;
             border-radius: 10px;
             cursor: pointer;
@@ -179,157 +170,130 @@
         }
 
         .tf-btn.active {
-            background: var(--accent-orange);
+            background: var(--accent);
             color: #0d0e12;
-            font-weight: 700;
-            box-shadow: 0 4px 12px var(--accent-orange-glow);
+            box-shadow: 0 4px 12px var(--accent-glow);
         }
 
-        /* Big Circular SCAN Button */
-        .scanner-hub {
+        /* Scan Section */
+        .scan-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 24px 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 20px;
+        }
+
+        .scan-btn-wrapper {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
             justify-content: center;
-            padding: 18px 0 10px;
         }
 
         .scan-ring {
-            width: 148px;
-            height: 148px;
-            border-radius: 50%;
-            padding: 8px;
-            background: linear-gradient(145deg, rgba(255, 152, 0, 0.28), rgba(255, 152, 0, 0.04));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 30px rgba(255, 152, 0, 0.15);
-            transition: transform 0.2s ease;
-        }
-
-        .scan-btn {
+            position: absolute;
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 2px solid var(--accent-orange);
-            background: radial-gradient(circle at 30% 30%, #ffb74d, #ff9800 65%, #e65100 100%);
+            border: 2px dashed rgba(255, 152, 0, 0.45);
+            animation: spinSlow 12s linear infinite;
+        }
+
+        @keyframes spinSlow {
+            100% { transform: rotate(360deg); }
+        }
+
+        .scan-btn {
+            width: 126px;
+            height: 126px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffb74d, #ff9800 65%, #e65100);
+            border: 4px solid #262936;
             color: #0d0e12;
-            font-family: 'Chakra Petch', sans-serif;
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            font-size: 22px;
+            letter-spacing: 1px;
             cursor: pointer;
-            box-shadow: 0 8px 25px var(--accent-orange-glow);
-            transition: all 0.2s ease;
-        }
-
-        .scan-btn:active {
-            transform: scale(0.95);
-        }
-
-        .scan-btn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .scan-ring.scanning {
-            animation: pulseRing 1.1s infinite ease-in-out;
-        }
-
-        @keyframes pulseRing {
-            0% { transform: scale(1); box-shadow: 0 0 15px var(--accent-orange-glow); }
-            50% { transform: scale(1.05); box-shadow: 0 0 35px rgba(255, 152, 0, 0.6); }
-            100% { transform: scale(1); box-shadow: 0 0 15px var(--accent-orange-glow); }
-        }
-
-        /* Step Progress Bar */
-        .steps-container {
-            display: none;
-            background: var(--bg-card);
-            border-radius: 14px;
-            padding: 14px 12px;
-            border: 1px solid var(--border-subtle);
-        }
-
-        .steps-container.visible {
-            display: block;
-        }
-
-        .steps-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-            text-align: center;
-        }
-
-        .step-item {
+            box-shadow: 0 0 28px var(--accent-glow);
+            transition: transform 0.15s ease, box-shadow 0.2s ease;
+            z-index: 2;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+        }
+
+        .scan-btn:active {
+            transform: scale(0.94);
+        }
+
+        .scan-btn:disabled {
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+
+        .scan-sub {
+            font-size: 9px;
+            font-weight: 800;
+            opacity: 0.9;
+            margin-top: 3px;
+        }
+
+        /* 4-Step Progress Bar */
+        .steps-container {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 6px;
         }
 
-        .step-bar {
-            width: 100%;
-            height: 5px;
-            border-radius: 4px;
+        .step-item {
             background: var(--bg-card-inner);
-            transition: background 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .step-item.active .step-bar {
-            background: var(--accent-orange);
-            box-shadow: 0 0 8px var(--accent-orange);
-        }
-
-        .step-item.done .step-bar {
-            background: var(--buy-green);
-        }
-
-        .step-label {
-            font-family: 'Chakra Petch', sans-serif;
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        .step-item.active .step-label {
-            color: var(--accent-orange);
-        }
-
-        .step-item.done .step-label {
-            color: var(--buy-green);
-        }
-
-        /* Error Alert */
-        .error-box {
-            display: none;
-            background: var(--sell-bg);
-            border: 1px solid var(--sell-red);
-            color: #ff8a9b;
-            padding: 12px 14px;
-            border-radius: 12px;
-            font-size: 13px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 4px;
             text-align: center;
-            line-height: 1.5;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            transition: all 0.25s ease;
+        }
+
+        .step-item.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(255, 152, 0, 0.12);
+            box-shadow: 0 0 10px rgba(255, 152, 0, 0.25);
+        }
+
+        .step-item.done {
+            border-color: var(--buy-color);
+            color: var(--buy-color);
+            background: rgba(0, 230, 118, 0.08);
         }
 
         /* Result Card */
         .result-card {
             display: none;
             background: var(--bg-card);
-            border-radius: 16px;
-            padding: 16px;
-            border: 1px solid var(--border-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 18px;
+            flex-direction: column;
+            gap: 14px;
             animation: slideUp 0.35s ease;
         }
 
-        .result-card.visible {
-            display: block;
-        }
-
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(12px); }
+            from { opacity: 0; transform: translateY(14px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -337,30 +301,29 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 14px;
             padding-bottom: 12px;
-            border-bottom: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-color);
         }
 
         .signal-badge {
-            font-family: 'Chakra Petch', sans-serif;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 20px;
-            font-weight: 700;
-            padding: 6px 18px;
+            font-weight: 800;
+            padding: 6px 16px;
             border-radius: 10px;
             letter-spacing: 1px;
         }
 
         .signal-badge.BUY {
             background: var(--buy-bg);
-            color: var(--buy-green);
-            border: 1px solid rgba(0, 230, 118, 0.4);
+            color: var(--buy-color);
+            border: 1px solid var(--buy-color);
         }
 
         .signal-badge.SELL {
             background: var(--sell-bg);
-            color: var(--sell-red);
-            border: 1px solid rgba(255, 61, 87, 0.4);
+            color: var(--sell-color);
+            border: 1px solid var(--sell-color);
         }
 
         .confidence-box {
@@ -373,10 +336,10 @@
         }
 
         .conf-value {
-            font-family: 'Chakra Petch', sans-serif;
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--accent-orange);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--accent);
         }
 
         /* Levels Grid */
@@ -384,70 +347,53 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            margin-bottom: 14px;
         }
 
         .level-box {
             background: var(--bg-card-inner);
-            padding: 11px 12px;
+            border: 1px solid var(--border-color);
             border-radius: 12px;
-            border: 1px solid var(--border-subtle);
+            padding: 12px;
         }
 
-        .level-top {
+        .level-title {
+            font-size: 11px;
+            color: var(--text-secondary);
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-bottom: 4px;
         }
 
-        .level-name {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        .level-pts {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 6px;
-        }
-
-        .pts-sl {
-            background: var(--sell-bg);
-            color: var(--sell-red);
-        }
-
-        .pts-tp {
-            background: var(--buy-bg);
-            color: var(--buy-green);
-        }
-
-        .pts-entry {
-            background: rgba(255, 152, 0, 0.15);
-            color: var(--accent-orange);
-        }
-
         .level-price {
-            font-family: 'Chakra Petch', sans-serif;
-            font-size: 18px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 17px;
             font-weight: 700;
-            color: #ffffff;
+            color: #fff;
         }
+
+        .pts-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .pts-sl { background: var(--sell-bg); color: var(--sell-color); }
+        .pts-tp { background: var(--buy-bg); color: var(--buy-color); }
 
         /* Technical Reasons */
         .reasons-box {
             background: var(--bg-card-inner);
             border-radius: 12px;
             padding: 12px;
-            border-left: 3px solid var(--accent-orange);
+            border-left: 3px solid var(--accent);
         }
 
         .reasons-title {
             font-size: 12px;
             font-weight: 600;
-            color: var(--accent-orange);
+            color: var(--accent);
             margin-bottom: 6px;
         }
 
@@ -461,35 +407,38 @@
         .reasons-list li {
             font-size: 12px;
             color: #d1d5db;
-            line-height: 1.45;
+            line-height: 1.4;
             padding-left: 14px;
             position: relative;
         }
 
         .reasons-list li::before {
             content: "•";
-            color: var(--accent-orange);
+            color: var(--accent);
             position: absolute;
             left: 0;
             font-weight: bold;
         }
 
-        /* Session Results Summary Box */
+        /* Session Results Summary */
         .session-card {
             background: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 14px 16px;
-            border: 1px solid var(--border-subtle);
         }
 
-        .session-title {
-            font-family: 'Chakra Petch', sans-serif;
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .session-header h3 {
             font-size: 13px;
             font-weight: 600;
             color: var(--text-secondary);
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .session-stats {
@@ -499,36 +448,43 @@
             text-align: center;
         }
 
-        .stat-item {
+        .stat-box {
             background: var(--bg-card-inner);
             padding: 10px 6px;
             border-radius: 10px;
         }
 
-        .stat-val {
-            font-family: 'Chakra Petch', sans-serif;
-            font-size: 18px;
-            font-weight: 700;
-            color: #ffffff;
+        .stat-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            font-weight: 800;
         }
 
-        .stat-val.green { color: var(--buy-green); }
-        .stat-val.red { color: var(--sell-red); }
-
-        .stat-lbl {
-            font-size: 11px;
+        .stat-label {
+            font-size: 10px;
             color: var(--text-secondary);
             margin-top: 2px;
+        }
+
+        .error-toast {
+            display: none;
+            background: var(--sell-bg);
+            border: 1px solid var(--sell-color);
+            color: #ffb4be;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header & GMT+7 Clock -->
-        <div class="header-bar">
+        <!-- Header -->
+        <div class="header">
             <div class="brand">
-                <div class="brand-dot"></div>
-                <div class="brand-title">GOLD AI SCANNER</div>
+                <div class="live-dot"></div>
+                <div class="brand-title">GOLD <span>AI SCANNER</span></div>
             </div>
             <div class="clock-box">
                 <div class="clock-time" id="thClock">--:--:--</div>
@@ -536,164 +492,140 @@
             </div>
         </div>
 
-        <!-- Live Price Card -->
-        <div class="price-card">
+        <!-- Live Price Ticker -->
+        <div class="ticker-card">
             <div class="pair-info">
-                <h2>GOLD (GC=F)</h2>
-                <span>COMEX Gold Futures • Unlimited Feed</span>
+                <h2>XAU/USD</h2>
+                <p>Gold Spot / US Dollar</p>
             </div>
-            <div class="live-price-box">
+            <div class="price-display">
                 <div class="live-price" id="livePrice">----.--</div>
-                <div class="live-status">
-                    <div class="pulse-dot"></div>
-                    <span>YAHOO FINANCE LIVE</span>
-                </div>
+                <div class="price-status" id="priceStatus">● LIVE MARKET</div>
             </div>
         </div>
 
         <!-- Timeframe Selector (Default 1m) -->
-        <div class="tf-selector">
+        <div class="tf-grid">
             <button class="tf-btn active" data-tf="1m">1m</button>
             <button class="tf-btn" data-tf="5m">5m</button>
             <button class="tf-btn" data-tf="15m">15m</button>
             <button class="tf-btn" data-tf="1h">1h</button>
         </div>
 
-        <!-- Big Circular SCAN Button -->
-        <div class="scanner-hub">
-            <div class="scan-ring" id="scanRing">
-                <button class="scan-btn" id="scanBtn">SCAN</button>
+        <!-- Error Message -->
+        <div class="error-toast" id="errorToast"></div>
+
+        <!-- Central Scan Button & Countdown Steps -->
+        <div class="scan-section">
+            <div class="scan-btn-wrapper">
+                <div class="scan-ring" id="scanRing"></div>
+                <button class="scan-btn" id="scanBtn">
+                    <span id="scanBtnText">SCAN</span>
+                    <span class="scan-sub" id="scanBtnSub">TAP TO ANALYZE</span>
+                </button>
+            </div>
+
+            <div class="steps-container">
+                <div class="step-item" id="step-1">1. MARKET</div>
+                <div class="step-item" id="step-2">2. INDICATORS</div>
+                <div class="step-item" id="step-3">3. ANALYSIS</div>
+                <div class="step-item" id="step-4">4. SIGNAL</div>
             </div>
         </div>
-
-        <!-- Step Progress Animation -->
-        <div class="steps-container" id="stepsContainer">
-            <div class="steps-grid">
-                <div class="step-item" id="step-1">
-                    <div class="step-bar"></div>
-                    <span class="step-label">MARKET</span>
-                </div>
-                <div class="step-item" id="step-2">
-                    <div class="step-bar"></div>
-                    <span class="step-label">INDICATORS</span>
-                </div>
-                <div class="step-item" id="step-3">
-                    <div class="step-bar"></div>
-                    <span class="step-label">ANALYSIS</span>
-                </div>
-                <div class="step-item" id="step-4">
-                    <div class="step-bar"></div>
-                    <span class="step-label">SIGNAL</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Error Message Box -->
-        <div class="error-box" id="errorBox"></div>
 
         <!-- Signal Result Card -->
         <div class="result-card" id="resultCard">
             <div class="result-header">
                 <div>
                     <span class="signal-badge BUY" id="signalBadge">BUY</span>
-                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px;">
-                        TIMEFRAME: <strong id="resTimeframe" style="color: #fff;">1M</strong>
-                    </div>
+                    <span style="font-size: 12px; color: var(--text-secondary); margin-left: 8px;" id="resTf">M1</span>
                 </div>
                 <div class="confidence-box">
                     <div class="conf-label">AI CONFIDENCE</div>
-                    <div class="conf-value" id="resConfidence">--%</div>
+                    <div class="conf-value" id="resConf">--%</div>
                 </div>
             </div>
 
             <div class="levels-grid">
                 <div class="level-box">
-                    <div class="level-top">
-                        <span class="level-name">ENTRY PRICE</span>
-                        <span class="level-pts pts-entry">MARKET</span>
-                    </div>
-                    <div class="level-price" id="resEntry">0.00</div>
+                    <div class="level-title"><span>ENTRY PRICE</span></div>
+                    <div class="level-price" id="resEntry" style="color: var(--accent);">----.--</div>
                 </div>
                 <div class="level-box">
-                    <div class="level-top">
-                        <span class="level-name">STOP LOSS (SL)</span>
-                        <span class="level-pts pts-sl" id="resSlPts">-0 pts</span>
+                    <div class="level-title">
+                        <span>STOP LOSS</span>
+                        <span class="pts-tag pts-sl" id="resSlPts">-0 PTS</span>
                     </div>
-                    <div class="level-price" id="resSl">0.00</div>
+                    <div class="level-price" id="resSl" style="color: var(--sell-color);">----.--</div>
                 </div>
                 <div class="level-box">
-                    <div class="level-top">
-                        <span class="level-name">TP 1 (RR 1:1)</span>
-                        <span class="level-pts pts-tp" id="resTp1Pts">+0 pts</span>
+                    <div class="level-title">
+                        <span>TP 1 (RR 1:1)</span>
+                        <span class="pts-tag pts-tp" id="resTp1Pts">+0 PTS</span>
                     </div>
-                    <div class="level-price" id="resTp1">0.00</div>
+                    <div class="level-price" id="resTp1" style="color: var(--buy-color);">----.--</div>
                 </div>
                 <div class="level-box">
-                    <div class="level-top">
-                        <span class="level-name">TP 2 (RR 1:2)</span>
-                        <span class="level-pts pts-tp" id="resTp2Pts">+0 pts</span>
+                    <div class="level-title">
+                        <span>TP 2 (RR 1:2)</span>
+                        <span class="pts-tag pts-tp" id="resTp2Pts">+0 PTS</span>
                     </div>
-                    <div class="level-price" id="resTp2">0.00</div>
+                    <div class="level-price" id="resTp2" style="color: var(--buy-color);">----.--</div>
                 </div>
             </div>
 
             <div class="reasons-box">
-                <div class="reasons-title">เหตุผลการวิเคราะห์ทางเทคนิค</div>
+                <div class="reasons-title">เหตุผลทางเทคนิค (Technical Confluence)</div>
                 <ul class="reasons-list" id="reasonsList"></ul>
             </div>
         </div>
 
         <!-- Session Results Box -->
         <div class="session-card">
-            <div class="session-title">Session Results (รอบการสแกนนี้)</div>
+            <div class="session-header">
+                <h3>SESSION RESULTS</h3>
+                <span style="font-size: 11px; color: var(--accent);" id="lastScanTime">Ready</span>
+            </div>
             <div class="session-stats">
-                <div class="stat-item">
-                    <div class="stat-val" id="statTotal">0</div>
-                    <div class="stat-lbl">Total Scans</div>
+                <div class="stat-box">
+                    <div class="stat-num" id="statTotal" style="color: #fff;">0</div>
+                    <div class="stat-label">TOTAL SCANS</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-val green" id="statBuy">0</div>
-                    <div class="stat-lbl">BUY Signals</div>
+                <div class="stat-box">
+                    <div class="stat-num" id="statBuy" style="color: var(--buy-color);">0</div>
+                    <div class="stat-label">BUY SIGNALS</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-val red" id="statSell">0</div>
-                    <div class="stat-lbl">SELL Signals</div>
+                <div class="stat-box">
+                    <div class="stat-num" id="statSell" style="color: var(--sell-color);">0</div>
+                    <div class="stat-label">SELL SIGNALS</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const SYMBOL = "GC=F";
+        // ==========================================
+        // ใส่ TWELVE DATA API KEY ของคุณตรงนี้
+        // ==========================================
+        const TWELVE_DATA_API_KEY = "4cf8926373f6418b9cbf88c4c8ae7f32";
 
-        const TIMEFRAME_CONFIG = {
-            "1m": { interval: "1m", range: "1d" },
-            "5m": { interval: "5m", range: "5d" },
-            "15m": { interval: "15m", range: "5d" },
-            "1h": { interval: "1h", range: "1mo" }
+        const TIMEFRAME_MAP = {
+            "1m": "1min",
+            "5m": "5min",
+            "15m": "15min",
+            "1h": "1h"
         };
 
-        const MIN_SL_POINTS = {
-            "1m": 150,   // ขั้นต่ำ $1.50
-            "5m": 250,   // ขั้นต่ำ $2.50
-            "15m": 400,  // ขั้นต่ำ $4.00
-            "1h": 600    // ขั้นต่ำ $6.00
-        };
-
-        // 1. Initialize Telegram WebApp SDK
-        const tg = window.Telegram?.WebApp;
+        // 1. ตั้งค่า Telegram WebApp SDK ให้เปิดแบบเต็มจอสมบูรณ์
+        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (tg) {
             tg.ready();
             tg.expand();
-            tg.setHeaderColor('#0d0e12');
-            tg.setBackgroundColor('#0d0e12');
+            if (tg.setHeaderColor) tg.setHeaderColor('#0d0e12');
+            if (tg.setBackgroundColor) tg.setBackgroundColor('#0d0e12');
         }
 
-        // State Variables
-        let selectedTf = '1m';
-        let sessionStats = { total: 0, buy: 0, sell: 0 };
-
-        // 2. Thailand Clock (GMT+7)
+        // 2. นาฬิกาเวลาประเทศไทย (GMT+7) เรียลไทม์ตรงกับเวลาจริง
         function updateThailandClock() {
             const now = new Date();
             const options = {
@@ -703,58 +635,51 @@
                 second: '2-digit',
                 hour12: false
             };
-            document.getElementById('thClock').textContent = new Intl.DateTimeFormat('en-GB', options).format(now);
+            document.getElementById('thClock').textContent = now.toLocaleTimeString('th-TH', options);
         }
         setInterval(updateThailandClock, 1000);
         updateThailandClock();
 
-        // 3. Fetch Yahoo Finance Data with CORS Proxy Fallback (Unlimited & No API Key)
-        async function fetchYahooChart(interval, range) {
-            const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${SYMBOL}?interval=${interval}&range=${range}&_t=${Date.now()}`;
-            const endpoints = [
-                `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
-            ];
-
-            let lastError = null;
-            for (const url of endpoints) {
-                try {
-                    const res = await fetch(url);
-                    if (!res.ok) continue;
-                    const json = await res.json();
-                    const result = json?.chart?.result?.[0];
-                    if (result && result.indicators?.quote?.[0]) {
-                        return result;
-                    }
-                } catch (err) {
-                    lastError = err;
-                }
+        // 3. ดึงราคา XAU/USD ปัจจุบันจาก Twelve Data API
+        async function fetchLivePrice() {
+            if (!TWELVE_DATA_API_KEY || TWELVE_DATA_API_KEY === "YOUR_TWELVE_DATA_API_KEY") {
+                document.getElementById('priceStatus').textContent = "● ใส่ API KEY ก่อนใช้งาน";
+                document.getElementById('priceStatus').style.color = "#ff9800";
+                return;
             }
-            throw lastError || new Error("ไม่สามารถเชื่อมต่อข้อมูลกราฟทองคำจาก Yahoo Finance ได้ชั่วคราว");
+            try {
+                const url = `https://api.twelvedata.com/price?symbol=XAU/USD&apikey=${TWELVE_DATA_API_KEY}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.price) {
+                    document.getElementById('livePrice').textContent = parseFloat(data.price).toFixed(2);
+                    document.getElementById('priceStatus').textContent = "● LIVE MARKET";
+                    document.getElementById('priceStatus').style.color = "#00e676";
+                }
+            } catch (err) {
+                console.error('Price fetch error:', err);
+            }
         }
+        fetchLivePrice();
+        setInterval(fetchLivePrice, 20000); // อัปเดตราคาทุก 20 วินาทีเพื่อประหยัดโควตา API
 
-        // 4. Technical Indicators Calculation Engine (Pure JavaScript)
+        // 4. ฟังก์ชันคำนวณอินดิเคเตอร์จริง (EMA, RSI 14, ATR 14) ด้วย JavaScript
         function calculateEMA(closes, period) {
             const k = 2 / (period + 1);
-            const emaArray = [closes[0]];
+            let emaArray = [closes[0]];
             for (let i = 1; i < closes.length; i++) {
-                const ema = (closes[i] * k) + (emaArray[i - 1] * (1 - k));
-                emaArray.push(ema);
+                emaArray.push(closes[i] * k + emaArray[i - 1] * (1 - k));
             }
             return emaArray;
         }
 
         function calculateRSI(closes, period = 14) {
-            if (closes.length <= period) return 50.0;
-            let gains = 0;
-            let losses = 0;
-
+            let gains = 0, losses = 0;
             for (let i = 1; i <= period; i++) {
                 const diff = closes[i] - closes[i - 1];
                 if (diff >= 0) gains += diff;
                 else losses -= diff;
             }
-
             let avgGain = gains / period;
             let avgLoss = losses / period;
 
@@ -762,186 +687,174 @@
                 const diff = closes[i] - closes[i - 1];
                 const gain = diff > 0 ? diff : 0;
                 const loss = diff < 0 ? -diff : 0;
-                avgGain = ((avgGain * (period - 1)) + gain) / period;
-                avgLoss = ((avgLoss * (period - 1)) + loss) / period;
+                avgGain = (avgGain * (period - 1) + gain) / period;
+                avgLoss = (avgLoss * (period - 1) + loss) / period;
             }
-
-            if (avgLoss === 0) return 100.0;
+            if (avgLoss === 0) return 100;
             const rs = avgGain / avgLoss;
             return 100 - (100 / (1 + rs));
         }
 
         function calculateATR(candles, period = 14) {
-            if (candles.length <= period) return 1.5;
-            const trList = [candles[0].high - candles[0].low];
-
+            let trList = [];
             for (let i = 1; i < candles.length; i++) {
-                const highLow = candles[i].high - candles[i].low;
-                const highClose = Math.abs(candles[i].high - candles[i - 1].close);
-                const lowClose = Math.abs(candles[i].low - candles[i - 1].close);
-                trList.push(Math.max(highLow, highClose, lowClose));
+                const high = candles[i].high;
+                const low = candles[i].low;
+                const prevClose = candles[i - 1].close;
+                const tr = Math.max(
+                    high - low,
+                    Math.abs(high - prevClose),
+                    Math.abs(low - prevClose)
+                );
+                trList.push(tr);
             }
-
-            let atr = trList.slice(0, period).reduce((sum, val) => sum + val, 0) / period;
+            let atr = trList.slice(0, period).reduce((a, b) => a + b, 0) / period;
             for (let i = period; i < trList.length; i++) {
-                atr = ((atr * (period - 1)) + trList[i]) / period;
+                atr = (atr * (period - 1) + trList[i]) / period;
             }
             return atr;
         }
 
-        // 5. Fetch Live Price
-        async function fetchLivePrice() {
-            try {
-                const result = await fetchYahooChart("1m", "1d");
-                const closes = result.indicators.quote[0].close.filter(v => v !== null && !isNaN(v));
-                if (closes.length > 0) {
-                    const latestPrice = closes[closes.length - 1];
-                    document.getElementById('livePrice').textContent = latestPrice.toFixed(2);
-                }
-            } catch (err) {
-                console.error('Price fetch error:', err);
-            }
-        }
-        fetchLivePrice();
-        setInterval(fetchLivePrice, 10000);
-
-        // 6. Analyze Market Signal
-        async function analyzeMarketSignal(tfKey) {
-            const cfg = TIMEFRAME_CONFIG[tfKey] || TIMEFRAME_CONFIG["1m"];
-            const result = await fetchYahooChart(cfg.interval, cfg.range);
-            const quote = result.indicators.quote[0];
-
-            const candles = [];
-            for (let i = 0; i < quote.close.length; i++) {
-                if (
-                    quote.open[i] !== null &&
-                    quote.high[i] !== null &&
-                    quote.low[i] !== null &&
-                    quote.close[i] !== null
-                ) {
-                    candles.push({
-                        open: Number(quote.open[i]),
-                        high: Number(quote.high[i]),
-                        low: Number(quote.low[i]),
-                        close: Number(quote.close[i])
-                    });
-                }
+        // 5. ฟังก์ชันวิเคราะห์สัญญาณเทรด XAU/USD
+        async function analyzeMarketSignal(tfParam) {
+            if (!TWELVE_DATA_API_KEY || TWELVE_DATA_API_KEY === "YOUR_TWELVE_DATA_API_KEY") {
+                throw new Error("กรุณาใส่ Twelve Data API Key ในโค้ดบรรทัดที่ 484 ก่อนใช้งาน");
             }
 
-            if (candles.length < 30) {
-                throw new Error("ข้อมูลแท่งเทียนย้อนหลังไม่เพียงพอ (ตลาดอาจปิดทำการชั่วคราว)");
+            const interval = TIMEFRAME_MAP[tfParam] || "1min";
+            const tsUrl = `https://api.twelvedata.com/time_series?symbol=XAU/USD&interval=${interval}&outputsize=60&apikey=${TWELVE_DATA_API_KEY}`;
+            const priceUrl = `https://api.twelvedata.com/price?symbol=XAU/USD&apikey=${TWELVE_DATA_API_KEY}`;
+
+            const [tsRes, priceRes] = await Promise.all([
+                fetch(tsUrl).then(r => r.json()),
+                fetch(priceUrl).then(r => r.json())
+            ]);
+
+            if (!tsRes.values) {
+                throw new Error(tsRes.message || "ไม่สามารถดึงข้อมูลกราฟได้ (ตรวจสอบ API Key หรือโควตา API)");
             }
+
+            // เรียงแท่งเทียนจากอดีต -> ปัจจุบัน
+            const candles = tsRes.values.reverse().map(c => ({
+                open: parseFloat(c.open),
+                high: parseFloat(c.high),
+                low: parseFloat(c.low),
+                close: parseFloat(c.close)
+            }));
 
             const closes = candles.map(c => c.close);
-            const ema9Series = calculateEMA(closes, 9);
-            const ema21Series = calculateEMA(closes, 21);
+            const ema9Arr = calculateEMA(closes, 9);
+            const ema21Arr = calculateEMA(closes, 21);
 
-            const len = closes.length;
-            const currentPrice = closes[len - 1];
-            const ema9 = ema9Series[len - 1];
-            const ema21 = ema21Series[len - 1];
-            const prevEma9 = ema9Series[len - 2];
-            const prevEma21 = ema21Series[len - 2];
+            const ema9 = ema9Arr[ema9Arr.length - 1];
+            const prevEma9 = ema9Arr[ema9Arr.length - 2];
+            const ema21 = ema21Arr[ema21Arr.length - 1];
+            const prevEma21 = ema21Arr[ema21Arr.length - 2];
             const rsi = calculateRSI(closes, 14);
             const atr = calculateATR(candles, 14);
 
-            let bullishScore = 0;
-            let bearishScore = 0;
-            const reasons = [];
+            const currentPrice = priceRes.price ? parseFloat(priceRes.price) : closes[closes.length - 1];
 
-            // เงื่อนไขที่ 1: ทิศทางเส้น EMA 9 และ EMA 21
+            let direction = "BUY";
+            let confidence = 65;
+            let reasons = [];
+
             if (ema9 > ema21) {
-                bullishScore += 35;
+                direction = "BUY";
+                reasons.push(`EMA 9 (${ema9.toFixed(2)}) ตัดขึ้นเหนือ EMA 21 (${ema21.toFixed(2)}) ยืนยันโมเมนตัมขาขึ้น`);
+                confidence += 10;
                 if (prevEma9 <= prevEma21) {
-                    bullishScore += 15;
-                    reasons.push("เกิดสัญญาณ Golden Cross (EMA 9 ตัดขึ้นเหนือ EMA 21)");
-                } else {
-                    reasons.push(`โครงสร้างขาขึ้นระยะสั้น EMA 9 (${ema9.toFixed(2)}) ยืนเหนือ EMA 21 (${ema21.toFixed(2)})`);
+                    reasons.push("เกิดสัญญาณ Golden Cross ระยะสั้นในแท่งเทียนล่าสุด");
+                    confidence += 8;
                 }
             } else {
-                bearishScore += 35;
+                direction = "SELL";
+                reasons.push(`EMA 9 (${ema9.toFixed(2)}) ตัดลงต่ำกว่า EMA 21 (${ema21.toFixed(2)}) ยืนยันแรงกดดันขาลง`);
+                confidence += 10;
                 if (prevEma9 >= prevEma21) {
-                    bearishScore += 15;
-                    reasons.push("เกิดสัญญาณ Death Cross (EMA 9 ตัดลงใต้ EMA 21)");
-                } else {
-                    reasons.push(`โครงสร้างขาลงระยะสั้น EMA 9 (${ema9.toFixed(2)}) อยู่ต่ำกว่า EMA 21 (${ema21.toFixed(2)})`);
+                    reasons.push("เกิดสัญญาณ Death Cross ระยะสั้นในแท่งเทียนล่าสุด");
+                    confidence += 8;
                 }
             }
-
-            // เงื่อนไขที่ 2: ตำแหน่งราคาเทียบกับเส้น EMA 9
-            if (currentPrice > ema9) {
-                bullishScore += 20;
-                reasons.push("ราคาปัจจุบันยืนเหนือเส้นแนวรับไดนามิก EMA 9");
-            } else {
-                bearishScore += 20;
-                reasons.push("ราคาปัจจุบันถูกกดดันอยู่ใต้เส้นแนวต้าน EMA 9");
-            }
-
-            // เงื่อนไขที่ 3: โมเมนตัมจาก RSI (14)
-            if (rsi >= 52 && rsi <= 72) {
-                bullishScore += 25;
-                reasons.push(`RSI (${rsi.toFixed(1)}) มีแรงซื้อสนับสนุนต่อเนื่องและยังไม่เข้าเขต Overbought รุนแรง`);
-            } else if (rsi < 32) {
-                bullishScore += 20;
-                reasons.push(`RSI (${rsi.toFixed(1)}) อยู่ในโซน Oversold มีโอกาสดีดตัวกลับระยะสั้น`);
-            } else if (rsi >= 28 && rsi <= 48) {
-                bearishScore += 25;
-                reasons.push(`RSI (${rsi.toFixed(1)}) มีแรงขายคุมตลาดต่อเนื่อง`);
-            } else if (rsi > 68) {
-                bearishScore += 20;
-                reasons.push(`RSI (${rsi.toFixed(1)}) เข้าเขต Overbought เสี่ยงต่อการย่อตัว`);
-            } else {
-                reasons.push(`RSI (${rsi.toFixed(1)}) เคลื่อนไหวในกรอบสมดุล`);
-            }
-
-            const direction = bullishScore >= bearishScore ? "BUY" : "SELL";
-            const rawConfidence = direction === "BUY" ? bullishScore : bearishScore;
-            const confidence = Math.min(94, Math.max(62, rawConfidence + 12));
-
-            // คำนวณ SL / TP1 / TP2 จาก ATR (14) และระยะขั้นต่ำ
-            const atrSlDistance = atr * 1.5;
-            const minSlPriceDiff = MIN_SL_POINTS[tfKey] / 100.0;
-            const slDistance = Math.max(atrSlDistance, minSlPriceDiff);
-
-            const entryPrice = parseFloat(currentPrice.toFixed(2));
-            let slPrice, tp1Price, tp2Price;
 
             if (direction === "BUY") {
-                slPrice = parseFloat((entryPrice - slDistance).toFixed(2));
-                tp1Price = parseFloat((entryPrice + slDistance).toFixed(2));
-                tp2Price = parseFloat((entryPrice + (slDistance * 2)).toFixed(2));
+                if (rsi >= 50 && rsi <= 68) {
+                    reasons.push(`RSI(14) อยู่ที่ ${rsi.toFixed(1)} มีแรงซื้อสนับสนุนและยังไม่เข้าเขต Overbought`);
+                    confidence += 9;
+                } else if (rsi < 35) {
+                    reasons.push(`RSI(14) อยู่ที่ ${rsi.toFixed(1)} เข้าเขต Oversold มีโอกาสดีดตัวกลับ (Reversal)`);
+                    confidence += 7;
+                } else {
+                    reasons.push(`RSI(14) อยู่ที่ ${rsi.toFixed(1)} เคลื่อนไหวตามแรงส่งตลาด`);
+                }
             } else {
-                slPrice = parseFloat((entryPrice + slDistance).toFixed(2));
-                tp1Price = parseFloat((entryPrice - slDistance).toFixed(2));
-                tp2Price = parseFloat((entryPrice - (slDistance * 2)).toFixed(2));
+                if (rsi >= 32 && rsi <= 50) {
+                    reasons.push(`RSI(14) อยู่ที่ ${rsi.toFixed(1)} มีแรงขายต่อเนื่องและยังไม่เข้าเขต Oversold`);
+                    confidence += 9;
+                } else if (rsi > 65) {
+                    reasons.push(`RSI(14) อยู่ที่ ${rsi.toFixed(1)} เข้าเขต Overbought มีโอกาสย่อตัวลง`);
+                    confidence += 7;
+                } else {
+                    reasons.push(`RSI(14) อยู่ที่ ${rsi.toFixed(1)} เคลื่อนไหวตามแรงกดดันตลาด`);
+                }
             }
 
+            // กำหนดระยะ SL ขั้นต่ำตาม Timeframe ($1.00 = 100 จุด)
+            const minSlDollars = { "1m": 1.50, "5m": 2.50, "15m": 4.00, "1h": 7.00 };
+            const slDistance = Math.max(atr * 1.5, minSlDollars[tfParam] || 1.50);
+            const tp1Distance = slDistance * 1.0; // RR 1:1
+            const tp2Distance = slDistance * 2.0; // RR 1:2
+
+            const entry = currentPrice;
+            const sl = direction === "BUY" ? entry - slDistance : entry + slDistance;
+            const tp1 = direction === "BUY" ? entry + tp1Distance : entry - tp1Distance;
+            const tp2 = direction === "BUY" ? entry + tp2Distance : entry - tp2Distance;
+
+            const slPoints = Math.round(slDistance * 100);
+            const tp1Points = Math.round(tp1Distance * 100);
+            const tp2Points = Math.round(tp2Distance * 100);
+
+            reasons.push(`ความผันผวน ATR(14) = $${atr.toFixed(2)} คำนวณระยะ SL ที่ ${slPoints} จุด`);
+            confidence = Math.min(confidence, 96);
+
             return {
-                timeframe: tfKey.toUpperCase(),
-                direction: direction,
-                entry: entryPrice.toFixed(2),
-                sl: slPrice.toFixed(2),
-                tp1: tp1Price.toFixed(2),
-                tp2: tp2Price.toFixed(2),
-                sl_points: Math.round(Math.abs(entryPrice - slPrice) * 100),
-                tp1_points: Math.round(Math.abs(tp1Price - entryPrice) * 100),
-                tp2_points: Math.round(Math.abs(tp2Price - entryPrice) * 100),
-                confidence: confidence,
-                reasons: reasons.slice(0, 3)
+                timeframe: tfParam.toUpperCase(),
+                direction,
+                entry: entry.toFixed(2),
+                sl: sl.toFixed(2),
+                tp1: tp1.toFixed(2),
+                tp2: tp2.toFixed(2),
+                sl_points: slPoints,
+                tp1_points: tp1Points,
+                tp2_points: tp2Points,
+                confidence,
+                reasons
             };
         }
 
-        // 7. Timeframe Selection
-        document.querySelectorAll('.tf-btn').forEach(btn => {
+        // 6. ระบบเลือก Timeframe
+        let selectedTf = '1m';
+        const tfButtons = document.querySelectorAll('.tf-btn');
+        tfButtons.forEach(btn => {
             btn.addEventListener('click', () => {
-                if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
-                document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
+                if (isScanning) return;
+                tfButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 selectedTf = btn.dataset.tf;
+                if (tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
             });
         });
 
-        // 8. Step Animation Helper
+        // 7. ระบบกดปุ่ม SCAN + ตัวนับถอยหลังและอนิเมชัน 4 ขั้นตอน
+        let isScanning = false;
+        let sessionStats = { total: 0, buy: 0, sell: 0 };
+
+        const scanBtn = document.getElementById('scanBtn');
+        const scanBtnText = document.getElementById('scanBtnText');
+        const scanBtnSub = document.getElementById('scanBtnSub');
+        const resultCard = document.getElementById('resultCard');
+        const errorToast = document.getElementById('errorToast');
+
         const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
         function resetSteps() {
@@ -951,102 +864,103 @@
             }
         }
 
-        async function runStepAnimation(analysisPromise) {
-            const stepsContainer = document.getElementById('stepsContainer');
-            stepsContainer.classList.add('visible');
+        scanBtn.addEventListener('click', async () => {
+            if (isScanning) return;
+            isScanning = true;
+            scanBtn.disabled = true;
+            errorToast.style.display = 'none';
+            resultCard.style.display = 'none';
             resetSteps();
 
-            // Step 1: MARKET
+            if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+            // เริ่มดึงข้อมูลและวิเคราะห์ควบคู่กับตัวนับถอยหลัง 4 ขั้นตอน
+            const analysisPromise = analyzeMarketSignal(selectedTf);
+
+            // Step 1: MARKET (04s)
             document.getElementById('step-1').classList.add('active');
-            await sleep(350);
+            scanBtnText.textContent = '04s';
+            scanBtnSub.textContent = 'FETCHING MARKET';
+            await sleep(700);
             document.getElementById('step-1').classList.replace('active', 'done');
 
-            // Step 2: INDICATORS
+            // Step 2: INDICATORS (03s)
             document.getElementById('step-2').classList.add('active');
-            await sleep(350);
+            scanBtnText.textContent = '03s';
+            scanBtnSub.textContent = 'EMA / RSI / ATR';
+            await sleep(700);
             document.getElementById('step-2').classList.replace('active', 'done');
 
-            // Step 3: ANALYSIS
+            // Step 3: ANALYSIS (02s)
             document.getElementById('step-3').classList.add('active');
-            const resultData = await analysisPromise;
-            await sleep(250);
+            scanBtnText.textContent = '02s';
+            scanBtnSub.textContent = 'AI CONFLUENCE';
+            await sleep(700);
             document.getElementById('step-3').classList.replace('active', 'done');
 
-            // Step 4: SIGNAL
+            // Step 4: SIGNAL (01s)
             document.getElementById('step-4').classList.add('active');
-            await sleep(250);
-            document.getElementById('step-4').classList.replace('active', 'done');
-
-            return resultData;
-        }
-
-        // 9. Execute Scan
-        document.getElementById('scanBtn').addEventListener('click', async () => {
-            const scanBtn = document.getElementById('scanBtn');
-            const scanRing = document.getElementById('scanRing');
-            const resultCard = document.getElementById('resultCard');
-            const errorBox = document.getElementById('errorBox');
-
-            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-
-            scanBtn.disabled = true;
-            scanRing.classList.add('scanning');
-            resultCard.classList.remove('visible');
-            errorBox.style.display = 'none';
+            scanBtnText.textContent = '01s';
+            scanBtnSub.textContent = 'GENERATING';
 
             try {
-                const analysisPromise = analyzeMarketSignal(selectedTf);
-                const data = await runStepAnimation(analysisPromise);
+                const data = await analysisPromise;
+                await sleep(400);
+                document.getElementById('step-4').classList.replace('active', 'done');
 
-                // Update Live Price
-                document.getElementById('livePrice').textContent = data.entry;
-
-                // Populate Result Card
-                const badge = document.getElementById('signalBadge');
-                badge.textContent = data.direction;
-                badge.className = `signal-badge ${data.direction}`;
-
-                document.getElementById('resTimeframe').textContent = data.timeframe;
-                document.getElementById('resConfidence').textContent = `${data.confidence}%`;
-                document.getElementById('resEntry').textContent = data.entry;
-                document.getElementById('resSl').textContent = data.sl;
-                document.getElementById('resTp1').textContent = data.tp1;
-                document.getElementById('resTp2').textContent = data.tp2;
-
-                document.getElementById('resSlPts').textContent = `-${data.sl_points} pts`;
-                document.getElementById('resTp1Pts').textContent = `+${data.tp1_points} pts`;
-                document.getElementById('resTp2Pts').textContent = `+${data.tp2_points} pts`;
-
-                const reasonsList = document.getElementById('reasonsList');
-                reasonsList.innerHTML = '';
-                data.reasons.forEach(reason => {
-                    const li = document.createElement('li');
-                    li.textContent = reason;
-                    reasonsList.appendChild(li);
-                });
-
-                resultCard.classList.add('visible');
-
-                // Update Session Stats
-                sessionStats.total += 1;
-                if (data.direction === 'BUY') sessionStats.buy += 1;
-                if (data.direction === 'SELL') sessionStats.sell += 1;
-
-                document.getElementById('statTotal').textContent = sessionStats.total;
-                document.getElementById('statBuy').textContent = sessionStats.buy;
-                document.getElementById('statSell').textContent = sessionStats.sell;
-
-                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-
+                renderResult(data);
+                if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             } catch (err) {
-                errorBox.textContent = err.message;
-                errorBox.style.display = 'block';
-                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                resetSteps();
+                errorToast.textContent = err.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อตลาด';
+                errorToast.style.display = 'block';
+                if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
             } finally {
+                isScanning = false;
                 scanBtn.disabled = false;
-                scanRing.classList.remove('scanning');
+                scanBtnText.textContent = 'SCAN';
+                scanBtnSub.textContent = 'TAP TO ANALYZE';
             }
         });
+
+        function renderResult(data) {
+            document.getElementById('livePrice').textContent = data.entry;
+
+            const badge = document.getElementById('signalBadge');
+            badge.textContent = data.direction;
+            badge.className = `signal-badge ${data.direction}`;
+
+            document.getElementById('resTf').textContent = `TF: ${data.timeframe}`;
+            document.getElementById('resConf').textContent = `${data.confidence}%`;
+
+            document.getElementById('resEntry').textContent = data.entry;
+            document.getElementById('resSl').textContent = data.sl;
+            document.getElementById('resTp1').textContent = data.tp1;
+            document.getElementById('resTp2').textContent = data.tp2;
+
+            document.getElementById('resSlPts').textContent = `-${data.sl_points} PTS`;
+            document.getElementById('resTp1Pts').textContent = `+${data.tp1_points} PTS`;
+            document.getElementById('resTp2Pts').textContent = `+${data.tp2_points} PTS`;
+
+            const reasonsList = document.getElementById('reasonsList');
+            reasonsList.innerHTML = '';
+            data.reasons.forEach(reason => {
+                const li = document.createElement('li');
+                li.textContent = reason;
+                reasonsList.appendChild(li);
+            });
+
+            sessionStats.total += 1;
+            if (data.direction === 'BUY') sessionStats.buy += 1;
+            if (data.direction === 'SELL') sessionStats.sell += 1;
+
+            document.getElementById('statTotal').textContent = sessionStats.total;
+            document.getElementById('statBuy').textContent = sessionStats.buy;
+            document.getElementById('statSell').textContent = sessionStats.sell;
+            document.getElementById('lastScanTime').textContent = `Last: ${document.getElementById('thClock').textContent}`;
+
+            resultCard.style.display = 'flex';
+        }
     </script>
 </body>
 </html>

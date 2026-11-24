@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>XAU/USD AI Signal Scanner</title>
+    <title>GOLD (GC=F) AI Signal Scanner</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -539,14 +539,14 @@
         <!-- Live Price Card -->
         <div class="price-card">
             <div class="pair-info">
-                <h2>XAU/USD</h2>
-                <span>Gold Spot / US Dollar</span>
+                <h2>GOLD (GC=F)</h2>
+                <span>COMEX Gold Futures • Unlimited Feed</span>
             </div>
             <div class="live-price-box">
                 <div class="live-price" id="livePrice">----.--</div>
                 <div class="live-status">
                     <div class="pulse-dot"></div>
-                    <span>REAL-TIME FEED</span>
+                    <span>YAHOO FINANCE LIVE</span>
                 </div>
             </div>
         </div>
@@ -664,22 +664,17 @@
     </div>
 
     <script>
-        // ==========================================
-        // === ใส่ API KEY ตรงนี้ ===
-        const API_KEY = "4cf8926373f6418b9cbf88c4c8ae7f32";
-        // ==========================================
+        const SYMBOL = "GC=F";
 
-        const BASE_URL = "https://api.twelvedata.com";
-
-        const TIMEFRAME_MAP = {
-            "1m": "1min",
-            "5m": "5min",
-            "15m": "15min",
-            "1h": "1h"
+        const TIMEFRAME_CONFIG = {
+            "1m": { interval: "1m", range: "1d" },
+            "5m": { interval: "5m", range: "5d" },
+            "15m": { interval: "15m", range: "5d" },
+            "1h": { interval: "1h", range: "1mo" }
         };
 
         const MIN_SL_POINTS = {
-            "1m": 150,   // ขั้นต่ำ $1.50 สำหรับ M1
+            "1m": 150,   // ขั้นต่ำ $1.50
             "5m": 250,   // ขั้นต่ำ $2.50
             "15m": 400,  // ขั้นต่ำ $4.00
             "1h": 600    // ขั้นต่ำ $6.00
@@ -713,7 +708,32 @@
         setInterval(updateThailandClock, 1000);
         updateThailandClock();
 
-        // 3. Technical Indicators Calculation Engine (Pure JavaScript)
+        // 3. Fetch Yahoo Finance Data with CORS Proxy Fallback (Unlimited & No API Key)
+        async function fetchYahooChart(interval, range) {
+            const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${SYMBOL}?interval=${interval}&range=${range}&_t=${Date.now()}`;
+            const endpoints = [
+                `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+            ];
+
+            let lastError = null;
+            for (const url of endpoints) {
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) continue;
+                    const json = await res.json();
+                    const result = json?.chart?.result?.[0];
+                    if (result && result.indicators?.quote?.[0]) {
+                        return result;
+                    }
+                } catch (err) {
+                    lastError = err;
+                }
+            }
+            throw lastError || new Error("ไม่สามารถเชื่อมต่อข้อมูลกราฟทองคำจาก Yahoo Finance ได้ชั่วคราว");
+        }
+
+        // 4. Technical Indicators Calculation Engine (Pure JavaScript)
         function calculateEMA(closes, period) {
             const k = 2 / (period + 1);
             const emaArray = [closes[0]];
@@ -769,45 +789,48 @@
             return atr;
         }
 
-        // 4. Fetch Live Price from Twelve Data
+        // 5. Fetch Live Price
         async function fetchLivePrice() {
-            if (!API_KEY || API_KEY === "YOUR_API_KEY") return;
             try {
-                const url = `${BASE_URL}/price?symbol=XAU/USD&apikey=${API_KEY}`;
-                const res = await fetch(url);
-                const data = await res.json();
-                if (data.price) {
-                    document.getElementById('livePrice').textContent = parseFloat(data.price).toFixed(2);
+                const result = await fetchYahooChart("1m", "1d");
+                const closes = result.indicators.quote[0].close.filter(v => v !== null && !isNaN(v));
+                if (closes.length > 0) {
+                    const latestPrice = closes[closes.length - 1];
+                    document.getElementById('livePrice').textContent = latestPrice.toFixed(2);
                 }
             } catch (err) {
                 console.error('Price fetch error:', err);
             }
         }
         fetchLivePrice();
-        setInterval(fetchLivePrice, 15000);
+        setInterval(fetchLivePrice, 10000);
 
-        // 5. Fetch Candles & Analyze Signal
+        // 6. Analyze Market Signal
         async function analyzeMarketSignal(tfKey) {
-            if (!API_KEY || API_KEY === "YOUR_API_KEY") {
-                throw new Error("กรุณาใส่ Twelve Data API Key ในตัวแปร API_KEY ที่บรรทัดแรกใต้ <script> ก่อนใช้งาน");
+            const cfg = TIMEFRAME_CONFIG[tfKey] || TIMEFRAME_CONFIG["1m"];
+            const result = await fetchYahooChart(cfg.interval, cfg.range);
+            const quote = result.indicators.quote[0];
+
+            const candles = [];
+            for (let i = 0; i < quote.close.length; i++) {
+                if (
+                    quote.open[i] !== null &&
+                    quote.high[i] !== null &&
+                    quote.low[i] !== null &&
+                    quote.close[i] !== null
+                ) {
+                    candles.push({
+                        open: Number(quote.open[i]),
+                        high: Number(quote.high[i]),
+                        low: Number(quote.low[i]),
+                        close: Number(quote.close[i])
+                    });
+                }
             }
 
-            const interval = TIMEFRAME_MAP[tfKey] || "1min";
-            const url = `${BASE_URL}/time_series?symbol=XAU/USD&interval=${interval}&outputsize=100&order=ASC&apikey=${API_KEY}`;
-
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (!data.values || !Array.isArray(data.values)) {
-                throw new Error(data.message || "ไม่สามารถดึงข้อมูลแท่งเทียนจาก Twelve Data API ได้");
+            if (candles.length < 30) {
+                throw new Error("ข้อมูลแท่งเทียนย้อนหลังไม่เพียงพอ (ตลาดอาจปิดทำการชั่วคราว)");
             }
-
-            const candles = data.values.map(item => ({
-                open: parseFloat(item.open),
-                high: parseFloat(item.high),
-                low: parseFloat(item.low),
-                close: parseFloat(item.close)
-            }));
 
             const closes = candles.map(c => c.close);
             const ema9Series = calculateEMA(closes, 9);
@@ -826,14 +849,14 @@
             let bearishScore = 0;
             const reasons = [];
 
-            // เงื่อนไขที่ 1: ทิศทาง EMA 9 และ EMA 21
+            // เงื่อนไขที่ 1: ทิศทางเส้น EMA 9 และ EMA 21
             if (ema9 > ema21) {
                 bullishScore += 35;
                 if (prevEma9 <= prevEma21) {
                     bullishScore += 15;
                     reasons.push("เกิดสัญญาณ Golden Cross (EMA 9 ตัดขึ้นเหนือ EMA 21)");
                 } else {
-                    reasons.push(`แนวโน้มขาขึ้นระยะสั้น EMA 9 (${ema9.toFixed(2)}) ยืนเหนือ EMA 21 (${ema21.toFixed(2)})`);
+                    reasons.push(`โครงสร้างขาขึ้นระยะสั้น EMA 9 (${ema9.toFixed(2)}) ยืนเหนือ EMA 21 (${ema21.toFixed(2)})`);
                 }
             } else {
                 bearishScore += 35;
@@ -841,11 +864,11 @@
                     bearishScore += 15;
                     reasons.push("เกิดสัญญาณ Death Cross (EMA 9 ตัดลงใต้ EMA 21)");
                 } else {
-                    reasons.push(`แนวโน้มขาลงระยะสั้น EMA 9 (${ema9.toFixed(2)}) อยู่ต่ำกว่า EMA 21 (${ema21.toFixed(2)})`);
+                    reasons.push(`โครงสร้างขาลงระยะสั้น EMA 9 (${ema9.toFixed(2)}) อยู่ต่ำกว่า EMA 21 (${ema21.toFixed(2)})`);
                 }
             }
 
-            // เงื่อนไขที่ 2: ตำแหน่งราคาเทียบกับ EMA 9
+            // เงื่อนไขที่ 2: ตำแหน่งราคาเทียบกับเส้น EMA 9
             if (currentPrice > ema9) {
                 bullishScore += 20;
                 reasons.push("ราคาปัจจุบันยืนเหนือเส้นแนวรับไดนามิก EMA 9");
@@ -908,7 +931,7 @@
             };
         }
 
-        // 6. Timeframe Selection
+        // 7. Timeframe Selection
         document.querySelectorAll('.tf-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
@@ -918,7 +941,7 @@
             });
         });
 
-        // 7. Step Animation Helper
+        // 8. Step Animation Helper
         const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
         function resetSteps() {
@@ -935,29 +958,29 @@
 
             // Step 1: MARKET
             document.getElementById('step-1').classList.add('active');
-            await sleep(400);
+            await sleep(350);
             document.getElementById('step-1').classList.replace('active', 'done');
 
             // Step 2: INDICATORS
             document.getElementById('step-2').classList.add('active');
-            await sleep(400);
+            await sleep(350);
             document.getElementById('step-2').classList.replace('active', 'done');
 
             // Step 3: ANALYSIS
             document.getElementById('step-3').classList.add('active');
             const resultData = await analysisPromise;
-            await sleep(300);
+            await sleep(250);
             document.getElementById('step-3').classList.replace('active', 'done');
 
             // Step 4: SIGNAL
             document.getElementById('step-4').classList.add('active');
-            await sleep(300);
+            await sleep(250);
             document.getElementById('step-4').classList.replace('active', 'done');
 
             return resultData;
         }
 
-        // 8. Execute Scan
+        // 9. Execute Scan
         document.getElementById('scanBtn').addEventListener('click', async () => {
             const scanBtn = document.getElementById('scanBtn');
             const scanRing = document.getElementById('scanRing');

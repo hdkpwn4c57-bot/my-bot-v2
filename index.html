@@ -666,7 +666,7 @@
     <script>
         // ==========================================
         // === ใส่ API KEY ตรงนี้ ===
-        const API_KEY = "YOUR_API_KEY";
+        const API_KEY = "4cf8926373f6418b9cbf88c4c8ae7f32";
         // ==========================================
 
         const BASE_URL = "https://api.twelvedata.com";
@@ -771,7 +771,7 @@
 
         // 4. Fetch Live Price from Twelve Data
         async function fetchLivePrice() {
-            if (!API_KEY || API_KEY === "4cf8926373f6418b9cbf88c4c8ae7f32") return;
+            if (!API_KEY || API_KEY === "YOUR_API_KEY") return;
             try {
                 const url = `${BASE_URL}/price?symbol=XAU/USD&apikey=${API_KEY}`;
                 const res = await fetch(url);

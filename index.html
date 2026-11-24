@@ -1,1572 +1,1029 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>UAE Scanner - 6-Indicator 1m Blitz</title>
-  
-  <!-- Telegram Web App SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-
-  <style>
-    :root {
-      --bg-main: #0c0d10;
-      --bg-card: #15171c;
-      --bg-card-inner: #1c1f26;
-      --border-color: #262a34;
-      --accent-orange: #ff9500;
-      --accent-orange-glow: rgba(255, 149, 0, 0.35);
-      --green: #10b981;
-      --green-bg: rgba(16, 185, 129, 0.14);
-      --red: #ef4444;
-      --red-bg: rgba(239, 68, 68, 0.14);
-      --yellow: #facc15;
-      --yellow-bg: rgba(250, 204, 21, 0.14);
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background-color: var(--bg-main);
-      color: var(--text-primary);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      overflow-x: hidden;
-    }
-
-    /* Whitelist Lock Screen */
-    .lock-overlay {
-      position: fixed;
-      inset: 0;
-      background: var(--bg-main);
-      z-index: 9999;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      text-align: center;
-    }
-
-    .lock-overlay.active { display: flex; }
-
-    .lock-box {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 28px 22px;
-      max-width: 360px;
-      width: 100%;
-    }
-
-    .lock-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: var(--red-bg);
-      color: var(--red);
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
-      margin: 0 auto 14px;
-    }
-
-    .lock-box h2 { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
-    .lock-box p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px; }
-
-    .user-id-badge {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      background: var(--bg-card-inner);
-      border: 1px solid var(--border-color);
-      padding: 8px 12px;
-      border-radius: 10px;
-      color: var(--accent-orange);
-    }
-
-    /* Main Container */
-    .app-container {
-      width: 100%;
-      max-width: 440px;
-      padding: 14px 16px 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    /* Header */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-bottom: 4px;
-    }
-
-    .brand { display: flex; align-items: center; gap: 10px; }
-
-    .brand-logo {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #2a2419, #121316);
-      border: 1.5px solid var(--accent-orange);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent-orange);
-      box-shadow: 0 0 12px rgba(255, 149, 0, 0.2);
-    }
-
-    .brand-text h1 {
-      font-size: 15px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .api-badge {
-      font-size: 9px;
-      font-weight: 800;
-      padding: 2px 6px;
-      border-radius: 4px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    .api-badge.ready {
-      background: rgba(255, 149, 0, 0.15);
-      color: var(--accent-orange);
-      border: 1px solid rgba(255, 149, 0, 0.35);
-    }
-
-    .api-badge.live {
-      background: var(--green-bg);
-      color: var(--green);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-    }
-
-    .api-badge.error {
-      background: var(--red-bg);
-      color: var(--red);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-    }
-
-    .brand-text span {
-      font-size: 10px;
-      color: var(--text-muted);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      display: block;
-      margin-top: 1px;
-    }
-
-    .clock-pill {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      padding: 6px 10px;
-      border-radius: 20px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .clock-pill strong { color: var(--text-primary); font-weight: 700; }
-
-    /* Asset Selector */
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 12px 14px;
-    }
-
-    .asset-selector {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-    }
-
-    .asset-left { display: flex; align-items: center; gap: 12px; }
-
-    .asset-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--bg-card-inner);
-      border: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-
-    .asset-meta { display: flex; flex-direction: column; gap: 2px; }
-
-    .asset-market-type {
-      font-size: 11px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .market-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--accent-orange);
-    }
-
-    .market-dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); }
-    .market-dot.error { background: var(--red); box-shadow: 0 0 6px var(--red); }
-
-    .asset-name-row { display: flex; align-items: center; gap: 8px; }
-    .asset-name { font-size: 16px; font-weight: 700; letter-spacing: 0.3px; }
-
-    .tag-blitz {
-      background: rgba(255, 149, 0, 0.16);
-      color: var(--accent-orange);
-      font-size: 10px;
-      font-weight: 800;
-      padding: 2px 6px;
-      border-radius: 5px;
-      border: 1px solid rgba(255, 149, 0, 0.35);
-    }
-
-    .live-price-tag {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-primary);
-      background: var(--bg-card-inner);
-      padding: 5px 9px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-
-    .price-live { color: var(--green) !important; border-color: rgba(16, 185, 129, 0.45) !important; }
-    .price-err { color: var(--red) !important; border-color: rgba(239, 68, 68, 0.45) !important; font-size: 11px; }
-
-    select.hidden-select {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-    }
-
-    /* Timeframe Selector */
-    .tf-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 6px;
-    }
-
-    .tf-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-secondary);
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 9px 0;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .tf-btn.active {
-      background: var(--accent-orange);
-      color: #0b0c0e;
-      font-weight: 800;
-      box-shadow: 0 4px 14px var(--accent-orange-glow);
-    }
-
-    /* Radar Scan Section */
-    .scanner-stage {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 12px 0 6px;
-      position: relative;
-    }
-
-    .radar-wrapper {
-      position: relative;
-      width: 210px;
-      height: 210px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
-    }
-
-    .radar-ring-outer {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      border: 1.5px dashed rgba(255, 149, 0, 0.35);
-    }
-
-    .radar-ring-arc {
-      position: absolute;
-      inset: 10px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      border-top-color: var(--accent-orange);
-      border-right-color: rgba(255, 149, 0, 0.4);
-    }
-
-    .scanning .radar-ring-outer { animation: spinReverse 8s linear infinite; }
-    .scanning .radar-ring-arc { animation: spin 1.4s linear infinite; }
-
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-    @keyframes spinReverse { 100% { transform: rotate(-360deg); } }
-
-    .scan-btn {
-      width: 158px;
-      height: 158px;
-      border-radius: 50%;
-      border: none;
-      background: radial-gradient(circle at 35% 30%, #ffbe44, #ff8800 70%, #d96b00);
-      box-shadow: 0 0 35px var(--accent-orange-glow), inset 0 2px 6px rgba(255, 255, 255, 0.45);
-      color: #111215;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      cursor: pointer;
-      position: relative;
-      z-index: 2;
-      transition: transform 0.15s ease;
-    }
-
-    .scan-btn:active { transform: scale(0.95); }
-    .scan-btn:disabled { cursor: not-allowed; filter: brightness(0.9); }
-
-    .scan-btn svg { width: 28px; height: 28px; stroke: #111215; stroke-width: 2.2; }
-    .scan-btn span { font-size: 15px; font-weight: 800; letter-spacing: 2px; }
-    .scan-btn small { font-size: 9px; font-weight: 800; letter-spacing: 1px; opacity: 0.85; }
-
-    .status-text {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-primary);
-      margin-bottom: 14px;
-      text-align: center;
-      min-height: 18px;
-      padding: 0 8px;
-    }
-
-    .status-text.error { color: var(--red); }
-    .status-text.wait { color: var(--yellow); }
-
-    /* Progress Stepper */
-    .stepper { width: 100%; padding: 0 10px; margin-bottom: 10px; }
-
-    .step-track {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-      margin-bottom: 8px;
-    }
-
-    .step-line-bg {
-      position: absolute;
-      left: 14px;
-      right: 14px;
-      height: 2px;
-      background: var(--border-color);
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 1;
-    }
-
-    .step-line-fill {
-      position: absolute;
-      left: 14px;
-      height: 2px;
-      width: 0%;
-      background: var(--accent-orange);
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 2;
-      transition: width 0.35s ease;
-    }
-
-    .step-dot {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: var(--bg-card);
-      border: 2px solid var(--border-color);
-      position: relative;
-      z-index: 3;
-      transition: all 0.3s ease;
-    }
-
-    .step-dot.active {
-      border-color: var(--accent-orange);
-      background: var(--bg-main);
-      box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.2);
-    }
-
-    .step-dot.done { background: var(--accent-orange); border-color: var(--accent-orange); }
-
-    .step-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-    }
-
-    .step-labels span.active { color: var(--accent-orange); }
-    .step-labels span.done { color: var(--text-primary); }
-
-    .feed-note { font-size: 11px; color: var(--text-muted); margin-top: 4px; text-align: center; }
-
-    /* Signal Result Card */
-    .signal-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 18px;
-      padding: 16px;
-      display: none;
-      flex-direction: column;
-      gap: 14px;
-      animation: slideUp 0.3s ease;
-    }
-
-    .signal-card.visible { display: flex; }
-    .signal-card.wait-mode { border-color: rgba(250, 204, 21, 0.45); }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .signal-top { display: flex; align-items: center; justify-content: space-between; }
-    .signal-direction-wrap { display: flex; align-items: center; gap: 12px; }
-
-    .dir-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: 800;
-      flex-shrink: 0;
-    }
-
-    .dir-icon.call { background: var(--green-bg); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.35); }
-    .dir-icon.put { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.35); }
-    .dir-icon.wait { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(250, 204, 21, 0.4); }
-
-    .dir-title { font-size: 22px; font-weight: 800; letter-spacing: 0.4px; line-height: 1.1; }
-    .dir-title.call { color: var(--green); }
-    .dir-title.put { color: var(--red); }
-    .dir-title.wait { color: var(--yellow); font-size: 18px; }
-    .dir-sub { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
-
-    .countdown-box {
-      background: var(--bg-card-inner);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 8px 12px;
-      text-align: center;
-      min-width: 90px;
-    }
-
-    .countdown-time {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .countdown-time.urgent { color: var(--accent-orange); }
-    .countdown-label { font-size: 9px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.6px; margin-top: 2px; }
-
-    .signal-metrics {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      border-top: 1px solid var(--border-color);
-      border-bottom: 1px solid var(--border-color);
-      padding: 12px 0;
-      text-align: center;
-    }
-
-    .metric-label { font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.6px; margin-bottom: 4px; }
-    .metric-val { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--text-primary); }
-    .metric-sub { font-size: 10px; color: var(--accent-orange); margin-top: 2px; }
-
-    /* Confidence Color Highlights */
-    .conf-high { color: var(--green) !important; }
-    .conf-mid { color: var(--accent-orange) !important; }
-    .conf-low { color: var(--yellow) !important; }
-
-    /* Insight Banner matching Reference Images */
-    .insight-banner {
-      text-align: center;
-      font-size: 13.5px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      padding: 4px 8px 2px;
-      letter-spacing: 0.2px;
-    }
-
-    .indicator-reason {
-      text-align: left;
-      font-size: 11px;
-      color: var(--text-secondary);
-      background: var(--bg-card-inner);
-      padding: 10px 12px;
-      border-radius: 10px;
-      line-height: 1.55;
-    }
-
-    .confluence-tags {
-      color: var(--text-primary);
-      font-weight: 700;
-      font-size: 11.5px;
-      margin-bottom: 4px;
-      display: block;
-    }
-
-    .raw-metrics {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10.5px;
-      color: var(--text-muted);
-      display: block;
-    }
-
-    .outcome-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-    .btn-outcome {
-      border: none;
-      border-radius: 10px;
-      padding: 10px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .btn-win { background: var(--green-bg); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.35); }
-    .btn-loss { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.35); }
-
-    /* Session Results */
-    .session-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 18px;
-      padding: 14px;
-    }
-
-    .session-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .session-title { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; color: var(--text-secondary); }
-    .session-status { font-size: 11px; color: var(--text-muted); }
-
-    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .stat-box { border-radius: 12px; padding: 12px 8px; text-align: center; }
-    .stat-box.wins { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); }
-    .stat-box.losses { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); }
-    .stat-box.rate { background: rgba(255, 149, 0, 0.08); border: 1px solid rgba(255, 149, 0, 0.25); }
-
-    .stat-num { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 800; margin-bottom: 4px; }
-    .stat-box.wins .stat-num { color: var(--green); }
-    .stat-box.losses .stat-num { color: var(--red); }
-    .stat-box.rate .stat-num { color: var(--accent-orange); }
-    .stat-label { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; color: var(--text-secondary); }
-
-    .footer-note { text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>XAU/USD AI Signal Scanner</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0d0e12;
+            --bg-card: #16181f;
+            --bg-card-inner: #1e212b;
+            --accent-orange: #ff9800;
+            --accent-orange-glow: rgba(255, 152, 0, 0.35);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --buy-green: #00e676;
+            --buy-bg: rgba(0, 230, 118, 0.14);
+            --sell-red: #ff3d57;
+            --sell-bg: rgba(255, 61, 87, 0.14);
+            --border-subtle: rgba(255, 255, 255, 0.07);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px 14px 28px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Header & Clock */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent-orange);
+            box-shadow: 0 0 10px var(--accent-orange);
+        }
+
+        .brand-title {
+            font-family: 'Chakra Petch', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        .clock-box {
+            text-align: right;
+        }
+
+        .clock-time {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent-orange);
+        }
+
+        .clock-zone {
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        /* Live Price Card */
+        .price-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pair-info h2 {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .pair-info span {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .live-price-box {
+            text-align: right;
+        }
+
+        .live-price {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--accent-orange);
+            letter-spacing: 0.5px;
+        }
+
+        .live-status {
+            font-size: 11px;
+            color: var(--buy-green);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 5px;
+            margin-top: 2px;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--buy-green);
+            border-radius: 50%;
+            animation: blink 1.4s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.25; }
+        }
+
+        /* Timeframe Selector */
+        .tf-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            background: var(--bg-card);
+            padding: 6px;
+            border-radius: 14px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .tf-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tf-btn.active {
+            background: var(--accent-orange);
+            color: #0d0e12;
+            font-weight: 700;
+            box-shadow: 0 4px 12px var(--accent-orange-glow);
+        }
+
+        /* Big Circular SCAN Button */
+        .scanner-hub {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 0 10px;
+        }
+
+        .scan-ring {
+            width: 148px;
+            height: 148px;
+            border-radius: 50%;
+            padding: 8px;
+            background: linear-gradient(145deg, rgba(255, 152, 0, 0.28), rgba(255, 152, 0, 0.04));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(255, 152, 0, 0.15);
+            transition: transform 0.2s ease;
+        }
+
+        .scan-btn {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--accent-orange);
+            background: radial-gradient(circle at 30% 30%, #ffb74d, #ff9800 65%, #e65100 100%);
+            color: #0d0e12;
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px var(--accent-orange-glow);
+            transition: all 0.2s ease;
+        }
+
+        .scan-btn:active {
+            transform: scale(0.95);
+        }
+
+        .scan-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .scan-ring.scanning {
+            animation: pulseRing 1.1s infinite ease-in-out;
+        }
+
+        @keyframes pulseRing {
+            0% { transform: scale(1); box-shadow: 0 0 15px var(--accent-orange-glow); }
+            50% { transform: scale(1.05); box-shadow: 0 0 35px rgba(255, 152, 0, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 0 15px var(--accent-orange-glow); }
+        }
+
+        /* Step Progress Bar */
+        .steps-container {
+            display: none;
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 14px 12px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .steps-container.visible {
+            display: block;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            text-align: center;
+        }
+
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .step-bar {
+            width: 100%;
+            height: 5px;
+            border-radius: 4px;
+            background: var(--bg-card-inner);
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .step-item.active .step-bar {
+            background: var(--accent-orange);
+            box-shadow: 0 0 8px var(--accent-orange);
+        }
+
+        .step-item.done .step-bar {
+            background: var(--buy-green);
+        }
+
+        .step-label {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .step-item.active .step-label {
+            color: var(--accent-orange);
+        }
+
+        .step-item.done .step-label {
+            color: var(--buy-green);
+        }
+
+        /* Error Alert */
+        .error-box {
+            display: none;
+            background: var(--sell-bg);
+            border: 1px solid var(--sell-red);
+            color: #ff8a9b;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* Result Card */
+        .result-card {
+            display: none;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--border-subtle);
+            animation: slideUp 0.35s ease;
+        }
+
+        .result-card.visible {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .signal-badge {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            padding: 6px 18px;
+            border-radius: 10px;
+            letter-spacing: 1px;
+        }
+
+        .signal-badge.BUY {
+            background: var(--buy-bg);
+            color: var(--buy-green);
+            border: 1px solid rgba(0, 230, 118, 0.4);
+        }
+
+        .signal-badge.SELL {
+            background: var(--sell-bg);
+            color: var(--sell-red);
+            border: 1px solid rgba(255, 61, 87, 0.4);
+        }
+
+        .confidence-box {
+            text-align: right;
+        }
+
+        .conf-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .conf-value {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-orange);
+        }
+
+        /* Levels Grid */
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .level-box {
+            background: var(--bg-card-inner);
+            padding: 11px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .level-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .level-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .level-pts {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .pts-sl {
+            background: var(--sell-bg);
+            color: var(--sell-red);
+        }
+
+        .pts-tp {
+            background: var(--buy-bg);
+            color: var(--buy-green);
+        }
+
+        .pts-entry {
+            background: rgba(255, 152, 0, 0.15);
+            color: var(--accent-orange);
+        }
+
+        .level-price {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        /* Technical Reasons */
+        .reasons-box {
+            background: var(--bg-card-inner);
+            border-radius: 12px;
+            padding: 12px;
+            border-left: 3px solid var(--accent-orange);
+        }
+
+        .reasons-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-orange);
+            margin-bottom: 6px;
+        }
+
+        .reasons-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .reasons-list li {
+            font-size: 12px;
+            color: #d1d5db;
+            line-height: 1.45;
+            padding-left: 14px;
+            position: relative;
+        }
+
+        .reasons-list li::before {
+            content: "•";
+            color: var(--accent-orange);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        /* Session Results Summary Box */
+        .session-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 14px 16px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .session-title {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .session-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+
+        .stat-item {
+            background: var(--bg-card-inner);
+            padding: 10px 6px;
+            border-radius: 10px;
+        }
+
+        .stat-val {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .stat-val.green { color: var(--buy-green); }
+        .stat-val.red { color: var(--sell-red); }
+
+        .stat-lbl {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <!-- Header & GMT+7 Clock -->
+        <div class="header-bar">
+            <div class="brand">
+                <div class="brand-dot"></div>
+                <div class="brand-title">GOLD AI SCANNER</div>
+            </div>
+            <div class="clock-box">
+                <div class="clock-time" id="thClock">--:--:--</div>
+                <div class="clock-zone">BANGKOK (GMT+7)</div>
+            </div>
+        </div>
 
-  <!-- Whitelist Access Denied Screen -->
-  <div class="lock-overlay" id="lockOverlay">
-    <div class="lock-box">
-      <div class="lock-icon">🔒</div>
-      <h2>Access Restricted</h2>
-      <p>Your Telegram account is not authorized to use <strong>UAE Scanner</strong>. Contact Admin with your ID below.</p>
-      <div class="user-id-badge" id="lockedUserIdText">Telegram ID: Unknown</div>
+        <!-- Live Price Card -->
+        <div class="price-card">
+            <div class="pair-info">
+                <h2>XAU/USD</h2>
+                <span>Gold Spot / US Dollar</span>
+            </div>
+            <div class="live-price-box">
+                <div class="live-price" id="livePrice">----.--</div>
+                <div class="live-status">
+                    <div class="pulse-dot"></div>
+                    <span>REAL-TIME FEED</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeframe Selector (Default 1m) -->
+        <div class="tf-selector">
+            <button class="tf-btn active" data-tf="1m">1m</button>
+            <button class="tf-btn" data-tf="5m">5m</button>
+            <button class="tf-btn" data-tf="15m">15m</button>
+            <button class="tf-btn" data-tf="1h">1h</button>
+        </div>
+
+        <!-- Big Circular SCAN Button -->
+        <div class="scanner-hub">
+            <div class="scan-ring" id="scanRing">
+                <button class="scan-btn" id="scanBtn">SCAN</button>
+            </div>
+        </div>
+
+        <!-- Step Progress Animation -->
+        <div class="steps-container" id="stepsContainer">
+            <div class="steps-grid">
+                <div class="step-item" id="step-1">
+                    <div class="step-bar"></div>
+                    <span class="step-label">MARKET</span>
+                </div>
+                <div class="step-item" id="step-2">
+                    <div class="step-bar"></div>
+                    <span class="step-label">INDICATORS</span>
+                </div>
+                <div class="step-item" id="step-3">
+                    <div class="step-bar"></div>
+                    <span class="step-label">ANALYSIS</span>
+                </div>
+                <div class="step-item" id="step-4">
+                    <div class="step-bar"></div>
+                    <span class="step-label">SIGNAL</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message Box -->
+        <div class="error-box" id="errorBox"></div>
+
+        <!-- Signal Result Card -->
+        <div class="result-card" id="resultCard">
+            <div class="result-header">
+                <div>
+                    <span class="signal-badge BUY" id="signalBadge">BUY</span>
+                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px;">
+                        TIMEFRAME: <strong id="resTimeframe" style="color: #fff;">1M</strong>
+                    </div>
+                </div>
+                <div class="confidence-box">
+                    <div class="conf-label">AI CONFIDENCE</div>
+                    <div class="conf-value" id="resConfidence">--%</div>
+                </div>
+            </div>
+
+            <div class="levels-grid">
+                <div class="level-box">
+                    <div class="level-top">
+                        <span class="level-name">ENTRY PRICE</span>
+                        <span class="level-pts pts-entry">MARKET</span>
+                    </div>
+                    <div class="level-price" id="resEntry">0.00</div>
+                </div>
+                <div class="level-box">
+                    <div class="level-top">
+                        <span class="level-name">STOP LOSS (SL)</span>
+                        <span class="level-pts pts-sl" id="resSlPts">-0 pts</span>
+                    </div>
+                    <div class="level-price" id="resSl">0.00</div>
+                </div>
+                <div class="level-box">
+                    <div class="level-top">
+                        <span class="level-name">TP 1 (RR 1:1)</span>
+                        <span class="level-pts pts-tp" id="resTp1Pts">+0 pts</span>
+                    </div>
+                    <div class="level-price" id="resTp1">0.00</div>
+                </div>
+                <div class="level-box">
+                    <div class="level-top">
+                        <span class="level-name">TP 2 (RR 1:2)</span>
+                        <span class="level-pts pts-tp" id="resTp2Pts">+0 pts</span>
+                    </div>
+                    <div class="level-price" id="resTp2">0.00</div>
+                </div>
+            </div>
+
+            <div class="reasons-box">
+                <div class="reasons-title">เหตุผลการวิเคราะห์ทางเทคนิค</div>
+                <ul class="reasons-list" id="reasonsList"></ul>
+            </div>
+        </div>
+
+        <!-- Session Results Box -->
+        <div class="session-card">
+            <div class="session-title">Session Results (รอบการสแกนนี้)</div>
+            <div class="session-stats">
+                <div class="stat-item">
+                    <div class="stat-val" id="statTotal">0</div>
+                    <div class="stat-lbl">Total Scans</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val green" id="statBuy">0</div>
+                    <div class="stat-lbl">BUY Signals</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val red" id="statSell">0</div>
+                    <div class="stat-lbl">SELL Signals</div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Main Scanner App -->
-  <div class="app-container" id="mainApp">
-    <!-- Top Header -->
-    <header class="header">
-      <div class="brand">
-        <div class="brand-logo">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <path d="M12 2L15 22H9L12 2Z" />
-            <path d="M5 22H19" />
-          </svg>
-        </div>
-        <div class="brand-text">
-          <h1>UAE Scanner <span class="api-badge ready" id="apiStatusBadge">ON-DEMAND</span></h1>
-          <span>6-INDICATOR 1M BLITZ</span>
-        </div>
-      </div>
-
-      <div class="clock-pill">
-        <strong id="liveClock">--:--:--</strong>
-        <span>Thailand GMT+7</span>
-      </div>
-    </header>
-
-    <!-- Asset Selector -->
-    <div class="card asset-selector">
-      <div class="asset-left">
-        <div class="asset-icon" id="assetFlag">🇪🇺🇺🇸</div>
-        <div class="asset-meta">
-          <div class="asset-market-type">
-            <span class="market-dot" id="marketDot"></span>
-            <span id="marketStatusText">Press SCAN to fetch 50 real candles</span>
-          </div>
-          <div class="asset-name-row">
-            <span class="asset-name" id="selectedPairName">EUR/USD</span>
-            <span class="tag-blitz">1M BLITZ</span>
-          </div>
-        </div>
-      </div>
-
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span class="live-price-tag" id="livePriceDisplay">TAP SCAN</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </div>
-
-      <select id="pairSelect" class="hidden-select" aria-label="Select Real Forex Pair">
-        <option value="EUR/USD" data-flag="🇪🇺🇺🇸" data-decimals="5">EUR/USD (Real Forex)</option>
-        <option value="GBP/USD" data-flag="🇬🇧🇺🇸" data-decimals="5">GBP/USD (Real Forex)</option>
-        <option value="USD/JPY" data-flag="🇺🇸🇯🇵" data-decimals="3">USD/JPY (Real Forex)</option>
-        <option value="AUD/CAD" data-flag="🇦🇺🇨🇦" data-decimals="5">AUD/CAD (Real Forex)</option>
-      </select>
-    </div>
-
-    <!-- Timeframe Selector (1m Active Default for Blitz) -->
-    <div class="tf-grid" id="tfSelector">
-      <button class="tf-btn active" data-tf="1" data-interval="1min">1m</button>
-      <button class="tf-btn" data-tf="3" data-interval="3min">3m</button>
-      <button class="tf-btn" data-tf="5" data-interval="5min">5m</button>
-      <button class="tf-btn" data-tf="15" data-interval="15min">15m</button>
-    </div>
-
-    <!-- Center Radar & Scan Trigger -->
-    <section class="scanner-stage" id="scannerStage">
-      <div class="radar-wrapper">
-        <div class="radar-ring-outer"></div>
-        <div class="radar-ring-arc"></div>
-        <button class="scan-btn" id="scanBtn">
-          <svg viewBox="0 0 24 24" fill="none">
-            <rect x="6" y="6" width="12" height="12" rx="2"></rect>
-            <rect x="9" y="9" width="6" height="6"></rect>
-            <path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"></path>
-          </svg>
-          <span id="scanBtnText">SCAN</span>
-          <small>6 INDICATORS</small>
-        </button>
-      </div>
-
-      <div class="status-text" id="statusText">Ready • EMA + SAR + MACD + RSI + BB + ZigZag</div>
-
-      <!-- 4-Stage Analysis Stepper -->
-      <div class="stepper">
-        <div class="step-track">
-          <div class="step-line-bg"></div>
-          <div class="step-line-fill" id="stepLineFill"></div>
-          <div class="step-dot" id="dot0"></div>
-          <div class="step-dot" id="dot1"></div>
-          <div class="step-dot" id="dot2"></div>
-          <div class="step-dot" id="dot3"></div>
-        </div>
-        <div class="step-labels">
-          <span id="lbl0">50 CANDLES</span>
-          <span id="lbl1">6 INDICATORS</span>
-          <span id="lbl2">PATTERNS</span>
-          <span id="lbl3">SIGNAL</span>
-        </div>
-      </div>
-
-      <div class="feed-note">On-Demand Twelve Data (50 Bars) • Zero Idle Quota Usage</div>
-    </section>
-
-    <!-- Signal Output Box -->
-    <section class="signal-card" id="signalCard">
-      <div class="signal-top">
-        <div class="signal-direction-wrap">
-          <div class="dir-icon put" id="dirIcon">↓</div>
-          <div>
-            <div class="dir-title put" id="dirTitle">PUT</div>
-            <div class="dir-sub" id="dirSub">Lower • EUR/USD • 1 min (Blitz)</div>
-          </div>
-        </div>
-
-        <div class="countdown-box" id="countdownBox">
-          <div class="countdown-time" id="countdownTimer">00:05</div>
-          <div class="countdown-label" id="countdownLabel">ENTRY IN</div>
-        </div>
-      </div>
-
-      <div class="signal-metrics">
-        <div>
-          <div class="metric-label">ENTRY (+5S)</div>
-          <div class="metric-val" id="entryTimeVal">--:--:--</div>
-          <div class="metric-sub">Thailand GMT+7</div>
-        </div>
-        <div>
-          <div class="metric-label">CONFIDENCE</div>
-          <div class="metric-val" id="confidenceVal">--%</div>
-          <div class="metric-sub" id="setupModeLabel">Confluence</div>
-        </div>
-        <div>
-          <div class="metric-label">SPOT PRICE</div>
-          <div class="metric-val" id="signalSpotPrice">--</div>
-          <div class="metric-sub">Bar #50 Close</div>
-        </div>
-      </div>
-
-      <!-- Primary Price Action / Indicator Insight Headline -->
-      <div class="insight-banner" id="primaryInsightText">
-        Strong buyer volume detected
-      </div>
-
-      <div class="indicator-reason" id="reasonText">
-        <span class="confluence-tags" id="confluenceTags">--</span>
-        <span class="raw-metrics" id="rawMetricsText">--</span>
-      </div>
-
-      <div class="outcome-actions" id="outcomeActions">
-        <button class="btn-outcome btn-win" onclick="recordResult('WIN')">✓ MARK WIN</button>
-        <button class="btn-outcome btn-loss" onclick="recordResult('LOSS')">✕ MARK LOSS</button>
-      </div>
-    </section>
-
-    <!-- Session Results -->
-    <section class="session-card">
-      <div class="session-header">
-        <span class="session-title">SESSION RESULTS</span>
-        <span class="session-status" id="sessionStatus">No closed signals yet</span>
-      </div>
-
-      <div class="stats-grid">
-        <div class="stat-box wins">
-          <div class="stat-num" id="winCount">0</div>
-          <div class="stat-label">WINS</div>
-        </div>
-        <div class="stat-box losses">
-          <div class="stat-num" id="lossCount">0</div>
-          <div class="stat-label">LOSSES</div>
-        </div>
-        <div class="stat-box rate">
-          <div class="stat-num" id="winRate">0%</div>
-          <div class="stat-label">WIN RATE</div>
-        </div>
-      </div>
-    </section>
-
-    <div class="footer-note">6-Indicator + Price Action Engine • Twelve Data Real Market</div>
-  </div>
-
-  <script>
-    // =========================================
-    // === ใส่ API KEY ตรงนี้ ===
-    const API_KEY = "4cf8926373f6418b9cbf88c4c8ae7f32";
-    // =========================================
-
-    // ระบบล็อกสิทธิ์เข้าใช้งานด้วย Telegram User ID (Whitelist)
-    const ENABLE_WHITELIST = true; // เปลี่ยนเป็น true เมื่อต้องการเปิดระบบล็อกสิทธิ์เฉพาะ ID ด้านล่าง
-    const ALLOWED_TELEGRAM_IDS = [
-      8163991612,
-      987654321
-    ];
-
-    // 1. Initialize Telegram Web App & Check Whitelist
-    const tg = window.Telegram && window.Telegram.WebApp;
-    if (tg) {
-      tg.ready();
-      tg.expand();
-      if (tg.setHeaderColor) tg.setHeaderColor('#0c0d10');
-      if (tg.setBackgroundColor) tg.setBackgroundColor('#0c0d10');
-    }
-
-    function verifyWhitelistAccess() {
-      if (!ENABLE_WHITELIST) return true;
-      const user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
-      const userId = user ? user.id : null;
-
-      if (!userId || !ALLOWED_TELEGRAM_IDS.includes(Number(userId))) {
-        document.getElementById('lockOverlay').classList.add('active');
-        document.getElementById('mainApp').style.display = 'none';
-        document.getElementById('lockedUserIdText').textContent =
-          `Telegram ID: ${userId ? userId : 'Not opened inside Telegram'}`;
-        return false;
-      }
-      return true;
-    }
-
-    const isAuthorized = verifyWhitelistAccess();
-
-    // 2. Real-Time Thailand Clock (GMT+7)
-    function getThailandNow() {
-      const now = new Date();
-      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-      return new Date(utc + (3600000 * 7));
-    }
-
-    function formatTime(dateObj) {
-      const h = String(dateObj.getHours()).padStart(2, '0');
-      const m = String(dateObj.getMinutes()).padStart(2, '0');
-      const s = String(dateObj.getSeconds()).padStart(2, '0');
-      return `${h}:${m}:${s}`;
-    }
-
-    function updateClock() {
-      document.getElementById('liveClock').textContent = formatTime(getThailandNow());
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    // 3. On-Demand Twelve Data 50-Candle Fetcher (No Auto-Polling)
-    let currentPair = 'EUR/USD';
-    let currentTimeframe = 1;
-    let currentIntervalStr = '1min';
-    let decimals = 5;
-
-    function setConnectionStatus(state, message) {
-      const badge = document.getElementById('apiStatusBadge');
-      const dot = document.getElementById('marketDot');
-      const statusTxt = document.getElementById('marketStatusText');
-
-      badge.className = `api-badge ${state}`;
-      dot.className = `market-dot ${state}`;
-
-      if (state === 'live') badge.textContent = 'LIVE';
-      else if (state === 'error') badge.textContent = 'API ERROR';
-      else badge.textContent = 'ON-DEMAND';
-
-      statusTxt.textContent = message;
-    }
-
-    async function fetch50OHLCCandles(symbol, interval) {
-      if (!API_KEY) {
-        throw new Error('Missing API_KEY');
-      }
-
-      const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=${interval}&outputsize=50&apikey=${encodeURIComponent(API_KEY.trim())}`;
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (!data || !data.values || !Array.isArray(data.values)) {
-        throw new Error(data.message || 'Failed to fetch 50 candles from Twelve Data');
-      }
-
-      // Reverse to chronological order: index 0 = oldest, index 49 = latest candle
-      return data.values.map(c => ({
-        datetime: c.datetime,
-        open: parseFloat(c.open),
-        high: parseFloat(c.high),
-        low: parseFloat(c.low),
-        close: parseFloat(c.close),
-        volume: c.volume ? parseFloat(c.volume) : Math.abs(parseFloat(c.close) - parseFloat(c.open)) * 100000
-      })).reverse();
-    }
-
-    // Pair Selection Handler
-    document.getElementById('pairSelect').addEventListener('change', (e) => {
-      const opt = e.target.selectedOptions[0];
-      currentPair = opt.value;
-      decimals = parseInt(opt.dataset.decimals, 10);
-
-      document.getElementById('assetFlag').textContent = opt.dataset.flag;
-      document.getElementById('selectedPairName').textContent = currentPair;
-      const priceEl = document.getElementById('livePriceDisplay');
-      priceEl.className = 'live-price-tag';
-      priceEl.textContent = 'TAP SCAN';
-      setConnectionStatus('ready', 'Press SCAN to fetch 50 real candles');
-
-      if (tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-    });
-
-    // Timeframe Selection Handler
-    document.querySelectorAll('.tf-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentTimeframe = parseInt(btn.dataset.tf, 10);
-        currentIntervalStr = btn.dataset.interval;
-        if (tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-      });
-    });
-
-    // =========================================================================
-    // 4. 6-INDICATOR + PRICE ACTION PATTERN ENGINE
-    // =========================================================================
-
-    // [1] EMA Series Calculator (supports EMA 9, 20, 21)
-    function calculateEMASeries(values, period) {
-      const k = 2 / (period + 1);
-      const emaArr = new Array(values.length).fill(0);
-      emaArr[0] = values[0];
-      for (let i = 1; i < values.length; i++) {
-        emaArr[i] = (values[i] * k) + (emaArr[i - 1] * (1 - k));
-      }
-      return emaArr;
-    }
-
-    // [2] Parabolic SAR (Step = 0.02, Max = 0.2)
-    function calculateParabolicSAR(candles, step = 0.02, maxStep = 0.2) {
-      const n = candles.length;
-      let isBull = candles[1].close >= candles[0].close;
-      let sar = isBull ? candles[0].low : candles[0].high;
-      let ep = isBull ? candles[1].high : candles[1].low;
-      let af = step;
-
-      for (let i = 2; i < n; i++) {
-        const curr = candles[i];
-        const prev1 = candles[i - 1];
-        const prev2 = candles[i - 2];
-
-        sar = sar + af * (ep - sar);
-
-        if (isBull) {
-          sar = Math.min(sar, prev1.low, prev2.low);
-          if (curr.low < sar) {
-            isBull = false;
-            sar = ep;
-            ep = curr.low;
-            af = step;
-          } else {
-            if (curr.high > ep) {
-              ep = curr.high;
-              af = Math.min(maxStep, af + step);
-            }
-          }
-        } else {
-          sar = Math.max(sar, prev1.high, prev2.high);
-          if (curr.high > sar) {
-            isBull = true;
-            sar = ep;
-            ep = curr.high;
-            af = step;
-          } else {
-            if (curr.low < ep) {
-              ep = curr.low;
-              af = Math.min(maxStep, af + step);
-            }
-          }
-        }
-      }
-
-      return { value: sar, isBullish: isBull };
-    }
-
-    // [3] MACD (12, 26, 9)
-    function calculateMACD(closes, fast = 12, slow = 26, signal = 9) {
-      const emaFast = calculateEMASeries(closes, fast);
-      const emaSlow = calculateEMASeries(closes, slow);
-      const macdLine = closes.map((_, i) => emaFast[i] - emaSlow[i]);
-      const signalLine = calculateEMASeries(macdLine, signal);
-
-      const idx = closes.length - 1;
-      const prevIdx = idx - 1;
-
-      const macdNow = macdLine[idx];
-      const sigNow = signalLine[idx];
-      const histNow = macdNow - sigNow;
-
-      const macdPrev = macdLine[prevIdx];
-      const sigPrev = signalLine[prevIdx];
-      const histPrev = macdPrev - sigPrev;
-
-      const bullCross = (macdPrev <= sigPrev && macdNow > sigNow) || (macdNow > sigNow && histNow > histPrev);
-      const bearCross = (macdPrev >= sigPrev && macdNow < sigNow) || (macdNow < sigNow && histNow < histPrev);
-
-      return {
-        macd: macdNow,
-        signal: sigNow,
-        histogram: histNow,
-        bullish: bullCross,
-        bearish: bearCross
-      };
-    }
-
-    // [4] Wilder's RSI (14) + Slope Direction
-    function calculateRSISeries(closes, period = 14) {
-      const rsiArr = new Array(closes.length).fill(50);
-      if (closes.length <= period) return rsiArr;
-
-      let gains = 0;
-      let losses = 0;
-      for (let i = 1; i <= period; i++) {
-        const diff = closes[i] - closes[i - 1];
-        if (diff >= 0) gains += diff;
-        else losses -= diff;
-      }
-
-      let avgGain = gains / period;
-      let avgLoss = losses / period;
-      rsiArr[period] = avgLoss === 0 ? 100 : 100 - (100 / (1 + (avgGain / avgLoss)));
-
-      for (let i = period + 1; i < closes.length; i++) {
-        const diff = closes[i] - closes[i - 1];
-        const g = diff > 0 ? diff : 0;
-        const l = diff < 0 ? -diff : 0;
-        avgGain = ((avgGain * (period - 1)) + g) / period;
-        avgLoss = ((avgLoss * (period - 1)) + l) / period;
-        rsiArr[i] = avgLoss === 0 ? 100 : 100 - (100 / (1 + (avgGain / avgLoss)));
-      }
-
-      return rsiArr;
-    }
-
-    // [5] Bollinger Bands (20, 2)
-    function calculateBollingerBands(closes, period = 20, mult = 2) {
-      const slice = closes.slice(-period);
-      const mean = slice.reduce((a, b) => a + b, 0) / slice.length;
-      const variance = slice.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / slice.length;
-      const stdDev = Math.sqrt(variance);
-
-      return {
-        upper: mean + (mult * stdDev),
-        middle: mean,
-        lower: mean - (mult * stdDev)
-      };
-    }
-
-    // [6] ZigZag (Deviation = 0.1%) -> Track Pivot History for Double Bottom / Breakout Detection
-    function calculateZigZagPivots(candles, deviationPct = 0.1) {
-      const dev = deviationPct / 100;
-      let lastPivotPrice = candles[0].close;
-      let lastPivotType = null;
-      const peaks = [];
-      const troughs = [];
-
-      for (let i = 1; i < candles.length - 1; i++) {
-        const h = candles[i].high;
-        const l = candles[i].low;
-
-        if (lastPivotType === null) {
-          if ((h - lastPivotPrice) / lastPivotPrice >= dev) {
-            lastPivotType = 'HIGH';
-            lastPivotPrice = h;
-            peaks.push({ index: i, price: h });
-          } else if ((lastPivotPrice - l) / lastPivotPrice >= dev) {
-            lastPivotType = 'LOW';
-            lastPivotPrice = l;
-            troughs.push({ index: i, price: l });
-          }
-        } else if (lastPivotType === 'HIGH') {
-          if (h > lastPivotPrice) {
-            lastPivotPrice = h;
-            peaks[peaks.length - 1] = { index: i, price: h };
-          } else if ((lastPivotPrice - l) / lastPivotPrice >= dev) {
-            lastPivotType = 'LOW';
-            lastPivotPrice = l;
-            troughs.push({ index: i, price: l });
-          }
-        } else if (lastPivotType === 'LOW') {
-          if (l < lastPivotPrice) {
-            lastPivotPrice = l;
-            troughs[troughs.length - 1] = { index: i, price: l };
-          } else if ((h - lastPivotPrice) / lastPivotPrice >= dev) {
-            lastPivotType = 'HIGH';
-            lastPivotPrice = h;
-            peaks.push({ index: i, price: h });
-          }
-        }
-      }
-
-      const fallbackPeak = Math.max(...candles.slice(0, -1).map(c => c.high));
-      const fallbackTrough = Math.min(...candles.slice(0, -1).map(c => c.low));
-
-      return {
-        peaks,
-        troughs,
-        latestPeak: peaks.length > 0 ? peaks[peaks.length - 1].price : fallbackPeak,
-        latestTrough: troughs.length > 0 ? troughs[troughs.length - 1].price : fallbackTrough
-      };
-    }
-
-    // =========================================================================
-    // 5. CONFLUENCE & PRICE ACTION INSIGHT ENGINE (60% - 95%, Threshold >= 75%)
-    // =========================================================================
-    function evaluate6IndicatorsConfluence(candles) {
-      const closes = candles.map(c => c.close);
-      const n = candles.length;
-      const latest = candles[n - 1];
-      const prev = candles[n - 2];
-
-      // Run all 6 real indicators
-      const ema9Arr = calculateEMASeries(closes, 9);
-      const ema20Arr = calculateEMASeries(closes, 20);
-      const ema21Arr = calculateEMASeries(closes, 21);
-
-      const ema9 = ema9Arr[n - 1];
-      const ema20 = ema20Arr[n - 1];
-      const ema21 = ema21Arr[n - 1];
-
-      const sar = calculateParabolicSAR(candles, 0.02, 0.2);
-      const macd = calculateMACD(closes, 12, 26, 9);
-
-      const rsiArr = calculateRSISeries(closes, 14);
-      const rsiNow = rsiArr[n - 1];
-      const rsiPrev = rsiArr[n - 2];
-      const rsiSlopeUp = rsiNow > rsiPrev;
-      const rsiSlopeDown = rsiNow < rsiPrev;
-
-      const bb = calculateBollingerBands(closes, 20, 2);
-      const zz = calculateZigZagPivots(candles, 0.1);
-
-      // Volume / Body Momentum Calculation
-      const avgVol = candles.slice(-15, -1).reduce((s, c) => s + c.volume, 0) / 14;
-      const latestBody = Math.abs(latest.close - latest.open);
-      const avgBody = candles.slice(-15, -1).reduce((s, c) => s + Math.abs(c.close - c.open), 0) / 14;
-      const strongBuyerVolume = (latest.close > latest.open) && (latest.volume > avgVol * 1.2 || latestBody > avgBody * 1.35);
-      const strongSellerVolume = (latest.close < latest.open) && (latest.volume > avgVol * 1.2 || latestBody > avgBody * 1.35);
-
-      // EMA20 Support Hold Check (Wick dipped to/below EMA20, closed bullish above EMA20)
-      const ema20SupportHold = (latest.low <= ema20 * 1.0002) && (latest.close > ema20) && (latest.close > latest.open);
-
-      // Double Bottom Pattern Check (Two recent ZigZag troughs within 0.08% tolerance)
-      let doubleBottomConfirmed = false;
-      if (zz.troughs.length >= 2) {
-        const t1 = zz.troughs[zz.troughs.length - 2].price;
-        const t2 = zz.troughs[zz.troughs.length - 1].price;
-        const diffPct = Math.abs(t1 - t2) / t1;
-        if (diffPct <= 0.0008 && latest.close > t2 && latest.close > latest.open) {
-          doubleBottomConfirmed = true;
-        }
-      }
-
-      // Resistance Breakdown / Support Breakdown Check
-      const resistanceBreakdown = (prev.close >= zz.latestTrough && latest.close < zz.latestTrough && strongSellerVolume) ||
-                                  (prev.high >= zz.latestPeak * 0.9998 && latest.close < prev.low && latest.close < ema9);
-
-      // Proximity tolerances
-      const bbRange = Math.max(0.00001, bb.upper - bb.lower);
-      const nearUpperBB = latest.high >= (bb.upper - bbRange * 0.08) || latest.close >= bb.upper;
-      const nearLowerBB = latest.low <= (bb.lower + bbRange * 0.08) || latest.close <= bb.lower;
-
-      const zzRange = Math.max(0.00001, zz.latestPeak - zz.latestTrough);
-      const nearZigZagPeak = latest.high >= (zz.latestPeak - zzRange * 0.10);
-      const nearZigZagTrough = latest.low <= (zz.latestTrough + zzRange * 0.10);
-
-      // --- SCORE CALL (BASE 55%, MAX 95%) ---
-      let callScore = 55;
-      const callConfirmations = [];
-      let callPrimaryHeadline = 'Strong buyer volume detected';
-
-      if (ema9 > ema21 && latest.close > ema9) {
-        callScore += 9;
-        callConfirmations.push('EMA9/21 Bull');
-      }
-      if (ema20SupportHold) {
-        callScore += 6;
-        callConfirmations.push('EMA20 Hold');
-        callPrimaryHeadline = 'EMA20 support hold, bullish push';
-      }
-      if (sar.isBullish) {
-        callScore += 8;
-        callConfirmations.push('SAR Bullish');
-      }
-      if (macd.bullish) {
-        callScore += 8;
-        callConfirmations.push('MACD Cross ↑');
-      }
-      if (rsiNow < 30) {
-        callScore += 10;
-        callConfirmations.push(`RSI Oversold (${rsiNow.toFixed(1)})`);
-        callPrimaryHeadline = 'RSI oversold bounce, trend up';
-      } else if (rsiNow >= 45 && rsiNow <= 68 && rsiSlopeUp) {
-        callScore += 5;
-        callConfirmations.push(`RSI Rising (${rsiNow.toFixed(1)})`);
-      }
-      if (nearLowerBB) {
-        callScore += 8;
-        callConfirmations.push('BB Lower Bounce');
-      }
-      if (doubleBottomConfirmed) {
-        callScore += 9;
-        callConfirmations.push('Double Bottom');
-        callPrimaryHeadline = 'Double bottom pattern confirmed';
-      } else if (nearZigZagTrough) {
-        callScore += 6;
-        callConfirmations.push('ZigZag Support');
-      }
-      if (strongBuyerVolume) {
-        callScore += 6;
-        callConfirmations.push('Buyer Volume ↑');
-        if (!doubleBottomConfirmed && rsiNow >= 30) {
-          callPrimaryHeadline = 'Strong buyer volume detected';
-        }
-      }
-
-      // --- SCORE PUT (BASE 55%, MAX 95%) ---
-      let putScore = 55;
-      const putConfirmations = [];
-      let putPrimaryHeadline = 'RSI neutral, trend down';
-
-      if (ema9 < ema21 && latest.close < ema9) {
-        putScore += 9;
-        putConfirmations.push('EMA9/21 Bear');
-      }
-      if (!sar.isBullish) {
-        putScore += 8;
-        putConfirmations.push('SAR Bearish');
-      }
-      if (macd.bearish) {
-        putScore += 8;
-        putConfirmations.push('MACD Cross ↓');
-      }
-      if (rsiNow > 70) {
-        putScore += 10;
-        putConfirmations.push(`RSI Overbought (${rsiNow.toFixed(1)})`);
-        putPrimaryHeadline = 'Overbought zone, reversal signal';
-      } else if (rsiNow >= 35 && rsiNow <= 55 && rsiSlopeDown) {
-        putScore += 6;
-        putConfirmations.push(`RSI Neutral/Down (${rsiNow.toFixed(1)})`);
-        putPrimaryHeadline = 'RSI neutral, trend down';
-      }
-      if (nearUpperBB) {
-        putScore += 8;
-        putConfirmations.push('BB Upper Reject');
-        if (rsiNow > 65) putPrimaryHeadline = 'Overbought zone, reversal signal';
-      }
-      if (resistanceBreakdown) {
-        putScore += 8;
-        putConfirmations.push('Breakdown Confirmed');
-        putPrimaryHeadline = 'Resistance breakdown confirmed';
-      } else if (nearZigZagPeak) {
-        putScore += 6;
-        putConfirmations.push('ZigZag Resistance');
-      }
-      if (strongSellerVolume) {
-        putScore += 5;
-        putConfirmations.push('Seller Volume ↓');
-      }
-
-      callScore = Math.min(95, callScore);
-      putScore = Math.min(95, putScore);
-
-      // Determine Winning Side
-      const isCallBetter = callScore >= putScore;
-      const bestScore = isCallBetter ? callScore : putScore;
-      const bestList = isCallBetter ? callConfirmations : putConfirmations;
-      const primaryHeadline = isCallBetter ? callPrimaryHeadline : putPrimaryHeadline;
-
-      const hasTrendCombo = isCallBetter
-        ? (ema9 > ema21 && sar.isBullish && macd.bullish)
-        : (ema9 < ema21 && !sar.isBullish && macd.bearish);
-      const setupLabel = hasTrendCombo ? 'Trend Follow' : 'Pattern / Reversal';
-
-      const rawMetrics =
-        `EMA9:${ema9.toFixed(decimals)} | EMA21:${ema21.toFixed(decimals)} | RSI:${rsiNow.toFixed(1)} | ` +
-        `SAR:${sar.isBullish ? 'Bull' : 'Bear'} | MACD:${macd.histogram >= 0 ? '+' : ''}${macd.histogram.toFixed(decimals)} | ` +
-        `BB[${bb.lower.toFixed(decimals)}-${bb.upper.toFixed(decimals)}] | ZZ[${zz.latestTrough.toFixed(decimals)}/${zz.latestPeak.toFixed(decimals)}]`;
-
-      // Threshold Check: >= 75% issues CALL or PUT; < 75% issues WAIT / INDECISIVE
-      if (bestScore >= 75) {
-        return {
-          status: isCallBetter ? 'CALL' : 'PUT',
-          confidence: bestScore,
-          setupLabel,
-          primaryHeadline,
-          tagsText: bestList.join(' + '),
-          rawMetrics,
-          spotPrice: latest.close.toFixed(decimals)
+    <script>
+        // ==========================================
+        // === ใส่ API KEY ตรงนี้ ===
+        const API_KEY = "YOUR_API_KEY";
+        // ==========================================
+
+        const BASE_URL = "https://api.twelvedata.com";
+
+        const TIMEFRAME_MAP = {
+            "1m": "1min",
+            "5m": "5min",
+            "15m": "15min",
+            "1h": "1h"
         };
-      } else {
-        return {
-          status: 'WAIT',
-          confidence: bestScore,
-          setupLabel: 'Indecisive',
-          primaryHeadline: 'Low confluence • Waiting for clearer setup',
-          tagsText: bestList.length > 0
-            ? `Partial (${bestScore}%): ${bestList.join(' + ')}`
-            : 'Conflicting Signals • Waiting for >= 75% Confluence',
-          rawMetrics,
-          spotPrice: latest.close.toFixed(decimals)
+
+        const MIN_SL_POINTS = {
+            "1m": 150,   // ขั้นต่ำ $1.50 สำหรับ M1
+            "5m": 250,   // ขั้นต่ำ $2.50
+            "15m": 400,  // ขั้นต่ำ $4.00
+            "1h": 600    // ขั้นต่ำ $6.00
         };
-      }
-    }
 
-    // =========================================================================
-    // 6. SCANNER EXECUTION & 5-SECOND BLITZ ENTRY COUNTDOWN
-    // =========================================================================
-    let isScanning = false;
-    let countdownInterval = null;
-    let openSignals = 0;
-    let wins = 0;
-    let losses = 0;
-
-    function setStepState(activeIdx) {
-      const fillWidths = ['0%', '33%', '66%', '100%'];
-      document.getElementById('stepLineFill').style.width = activeIdx >= 0 ? fillWidths[activeIdx] : '0%';
-
-      for (let i = 0; i < 4; i++) {
-        const dot = document.getElementById(`dot${i}`);
-        const lbl = document.getElementById(`lbl${i}`);
-        dot.classList.remove('active', 'done');
-        lbl.classList.remove('active', 'done');
-
-        if (i < activeIdx) {
-          dot.classList.add('done');
-          lbl.classList.add('done');
-        } else if (i === activeIdx) {
-          dot.classList.add('active');
-          lbl.classList.add('active');
+        // 1. Initialize Telegram WebApp SDK
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            tg.setHeaderColor('#0d0e12');
+            tg.setBackgroundColor('#0d0e12');
         }
-      }
-    }
 
-    document.getElementById('scanBtn').addEventListener('click', async () => {
-      if (isScanning || !isAuthorized) return;
-      isScanning = true;
+        // State Variables
+        let selectedTf = '1m';
+        let sessionStats = { total: 0, buy: 0, sell: 0 };
 
-      if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-
-      const stage = document.getElementById('scannerStage');
-      const btn = document.getElementById('scanBtn');
-      const btnText = document.getElementById('scanBtnText');
-      const statusText = document.getElementById('statusText');
-      const priceEl = document.getElementById('livePriceDisplay');
-
-      statusText.classList.remove('error', 'wait');
-      stage.classList.add('scanning');
-      btn.disabled = true;
-      btnText.textContent = 'SCANNING';
-
-      try {
-        // Step 1: Fetch 50 real candles from Twelve Data (1 API call)
-        setStepState(0);
-        statusText.textContent = `Fetching 50 real ${currentIntervalStr} candles for ${currentPair}...`;
-        const candles = await fetch50OHLCCandles(currentPair, currentIntervalStr);
-
-        // Update Top Price Display with Bar #50 Real Close
-        const latestPriceStr = candles[candles.length - 1].close.toFixed(decimals);
-        priceEl.className = 'live-price-tag price-live';
-        priceEl.textContent = latestPriceStr;
-        setConnectionStatus('live', `Twelve Data Live • ${candles[candles.length - 1].datetime.split(' ')[1] || 'Synced'}`);
-
-        // Step 2: Calculate all 6 Indicators
-        setStepState(1);
-        statusText.textContent = 'Calculating EMA, SAR, MACD, RSI, BB & ZigZag...';
-        await new Promise(r => setTimeout(r, 300));
-
-        // Step 3: Detect Patterns & Score Confluence
-        setStepState(2);
-        statusText.textContent = 'Analyzing patterns, volume & S/R confluence...';
-        await new Promise(r => setTimeout(r, 300));
-
-        const result = evaluate6IndicatorsConfluence(candles);
-
-        // Step 4: Output Result
-        setStepState(3);
-        if (tg && tg.HapticFeedback) {
-          tg.HapticFeedback.notificationOccurred(result.status === 'WAIT' ? 'warning' : 'success');
+        // 2. Thailand Clock (GMT+7)
+        function updateThailandClock() {
+            const now = new Date();
+            const options = {
+                timeZone: 'Asia/Bangkok',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+            document.getElementById('thClock').textContent = new Intl.DateTimeFormat('en-GB', options).format(now);
         }
-        renderConfluenceResult(result);
+        setInterval(updateThailandClock, 1000);
+        updateThailandClock();
 
-      } catch (err) {
-        setStepState(-1);
-        statusText.classList.add('error');
-        statusText.textContent = `API ERROR: ${err.message}`;
-        priceEl.className = 'live-price-tag price-err';
-        priceEl.textContent = 'API ERROR';
-        setConnectionStatus('error', err.message);
-        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-      } finally {
-        stage.classList.remove('scanning');
-        btn.disabled = false;
-        btnText.textContent = 'SCAN';
-        isScanning = false;
-      }
-    });
-
-    function renderConfluenceResult(result) {
-      const thNow = getThailandNow();
-      // 1m Blitz Entry = 5 seconds from scan completion
-      const entryDate = new Date(thNow.getTime() + 5000);
-      const entryStr = formatTime(entryDate);
-
-      const statusText = document.getElementById('statusText');
-      const card = document.getElementById('signalCard');
-      const dirIcon = document.getElementById('dirIcon');
-      const dirTitle = document.getElementById('dirTitle');
-      const dirSub = document.getElementById('dirSub');
-      const confEl = document.getElementById('confidenceVal');
-      const tfLabel = currentTimeframe === 1 ? '1 min (Blitz)' : `${currentTimeframe} min`;
-
-      card.classList.remove('wait-mode');
-      statusText.classList.remove('wait', 'error');
-
-      // Confidence Color Highlight: Green when >= 80%, Orange 75-79%, Yellow < 75%
-      confEl.classList.remove('conf-high', 'conf-mid', 'conf-low');
-      if (result.confidence >= 80) {
-        confEl.classList.add('conf-high');
-      } else if (result.confidence >= 75) {
-        confEl.classList.add('conf-mid');
-      } else {
-        confEl.classList.add('conf-low');
-      }
-
-      if (result.status === 'CALL') {
-        statusText.textContent = `Signal ready: CALL (${result.confidence}%) on ${currentPair} • ${tfLabel}`;
-        dirIcon.className = 'dir-icon call';
-        dirIcon.textContent = '↑';
-        dirTitle.className = 'dir-title call';
-        dirTitle.textContent = 'CALL';
-        dirSub.textContent = `Higher • ${currentPair} • ${tfLabel}`;
-        document.getElementById('outcomeActions').style.display = 'grid';
-        openSignals++;
-      } else if (result.status === 'PUT') {
-        statusText.textContent = `Signal ready: PUT (${result.confidence}%) on ${currentPair} • ${tfLabel}`;
-        dirIcon.className = 'dir-icon put';
-        dirIcon.textContent = '↓';
-        dirTitle.className = 'dir-title put';
-        dirTitle.textContent = 'PUT';
-        dirSub.textContent = `Lower • ${currentPair} • ${tfLabel}`;
-        document.getElementById('outcomeActions').style.display = 'grid';
-        openSignals++;
-      } else {
-        // WAIT / INDECISIVE (< 75% Confluence)
-        statusText.classList.add('wait');
-        statusText.textContent = `WAIT / INDECISIVE (${result.confidence}% < 75% threshold)`;
-        card.classList.add('wait-mode');
-        dirIcon.className = 'dir-icon wait';
-        dirIcon.textContent = '⏳';
-        dirTitle.className = 'dir-title wait';
-        dirTitle.textContent = 'WAIT / INDECISIVE';
-        dirSub.textContent = `Hold • ${currentPair} • ${tfLabel}`;
-        document.getElementById('outcomeActions').style.display = 'none';
-      }
-
-      document.getElementById('entryTimeVal').textContent = result.status === 'WAIT' ? '--:--:--' : entryStr;
-      confEl.textContent = `${result.confidence}%`;
-      document.getElementById('setupModeLabel').textContent = result.setupLabel;
-      document.getElementById('signalSpotPrice').textContent = result.spotPrice;
-
-      // Display clean Price Action / Indicator Insight Headline
-      document.getElementById('primaryInsightText').textContent = result.primaryHeadline;
-      document.getElementById('confluenceTags').textContent = result.tagsText;
-      document.getElementById('rawMetricsText').textContent = result.rawMetrics;
-
-      card.classList.add('visible');
-      updateSessionHeader();
-
-      // 5-Second Blitz Entry Countdown
-      if (countdownInterval) clearInterval(countdownInterval);
-      const timerEl = document.getElementById('countdownTimer');
-      const labelEl = document.getElementById('countdownLabel');
-
-      if (result.status === 'WAIT') {
-        timerEl.textContent = 'HOLD';
-        timerEl.classList.remove('urgent');
-        labelEl.textContent = 'NO ENTRY';
-        return;
-      }
-
-      function tickBlitzCountdown() {
-        const now = getThailandNow();
-        const diffMs = entryDate.getTime() - now.getTime();
-        const diffSec = Math.ceil(diffMs / 1000);
-
-        if (diffSec > 0) {
-          timerEl.textContent = `00:0${diffSec}`;
-          timerEl.classList.add('urgent');
-          labelEl.textContent = 'ENTRY IN';
-        } else {
-          const elapsedAfterEntry = Math.floor((now.getTime() - entryDate.getTime()) / 1000);
-          const expiryRem = (currentTimeframe * 60) - elapsedAfterEntry;
-
-          if (expiryRem > 0) {
-            const mins = String(Math.floor(expiryRem / 60)).padStart(2, '0');
-            const secs = String(expiryRem % 60).padStart(2, '0');
-            timerEl.textContent = `${mins}:${secs}`;
-            timerEl.classList.add('urgent');
-            labelEl.textContent = 'BLITZ LIVE';
-          } else {
-            timerEl.textContent = '00:00';
-            timerEl.classList.remove('urgent');
-            labelEl.textContent = 'FINISHED';
-            clearInterval(countdownInterval);
-          }
+        // 3. Technical Indicators Calculation Engine (Pure JavaScript)
+        function calculateEMA(closes, period) {
+            const k = 2 / (period + 1);
+            const emaArray = [closes[0]];
+            for (let i = 1; i < closes.length; i++) {
+                const ema = (closes[i] * k) + (emaArray[i - 1] * (1 - k));
+                emaArray.push(ema);
+            }
+            return emaArray;
         }
-      }
 
-      tickBlitzCountdown();
-      countdownInterval = setInterval(tickBlitzCountdown, 250);
-    }
+        function calculateRSI(closes, period = 14) {
+            if (closes.length <= period) return 50.0;
+            let gains = 0;
+            let losses = 0;
 
-    // 7. Session Result Tracker
-    function updateSessionHeader() {
-      const total = wins + losses;
-      if (openSignals > 0) {
-        document.getElementById('sessionStatus').textContent = `${openSignals} open`;
-      } else if (total > 0) {
-        document.getElementById('sessionStatus').textContent = `${total} closed signals`;
-      } else {
-        document.getElementById('sessionStatus').textContent = 'No closed signals yet';
-      }
-    }
+            for (let i = 1; i <= period; i++) {
+                const diff = closes[i] - closes[i - 1];
+                if (diff >= 0) gains += diff;
+                else losses -= diff;
+            }
 
-    function recordResult(type) {
-      if (type === 'WIN') wins++;
-      if (type === 'LOSS') losses++;
-      if (openSignals > 0) openSignals--;
+            let avgGain = gains / period;
+            let avgLoss = losses / period;
 
-      const total = wins + losses;
-      const rate = total > 0 ? Math.round((wins / total) * 100) : 0;
+            for (let i = period + 1; i < closes.length; i++) {
+                const diff = closes[i] - closes[i - 1];
+                const gain = diff > 0 ? diff : 0;
+                const loss = diff < 0 ? -diff : 0;
+                avgGain = ((avgGain * (period - 1)) + gain) / period;
+                avgLoss = ((avgLoss * (period - 1)) + loss) / period;
+            }
 
-      document.getElementById('winCount').textContent = wins;
-      document.getElementById('lossCount').textContent = losses;
-      document.getElementById('winRate').textContent = `${rate}%`;
-      document.getElementById('outcomeActions').style.display = 'none';
+            if (avgLoss === 0) return 100.0;
+            const rs = avgGain / avgLoss;
+            return 100 - (100 / (1 + rs));
+        }
 
-      updateSessionHeader();
-      if (tg && tg.HapticFeedback) {
-        tg.HapticFeedback.notificationOccurred(type === 'WIN' ? 'success' : 'error');
-      }
-    }
-  </script>
+        function calculateATR(candles, period = 14) {
+            if (candles.length <= period) return 1.5;
+            const trList = [candles[0].high - candles[0].low];
+
+            for (let i = 1; i < candles.length; i++) {
+                const highLow = candles[i].high - candles[i].low;
+                const highClose = Math.abs(candles[i].high - candles[i - 1].close);
+                const lowClose = Math.abs(candles[i].low - candles[i - 1].close);
+                trList.push(Math.max(highLow, highClose, lowClose));
+            }
+
+            let atr = trList.slice(0, period).reduce((sum, val) => sum + val, 0) / period;
+            for (let i = period; i < trList.length; i++) {
+                atr = ((atr * (period - 1)) + trList[i]) / period;
+            }
+            return atr;
+        }
+
+        // 4. Fetch Live Price from Twelve Data
+        async function fetchLivePrice() {
+            if (!API_KEY || API_KEY === "4cf8926373f6418b9cbf88c4c8ae7f32") return;
+            try {
+                const url = `${BASE_URL}/price?symbol=XAU/USD&apikey=${API_KEY}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.price) {
+                    document.getElementById('livePrice').textContent = parseFloat(data.price).toFixed(2);
+                }
+            } catch (err) {
+                console.error('Price fetch error:', err);
+            }
+        }
+        fetchLivePrice();
+        setInterval(fetchLivePrice, 15000);
+
+        // 5. Fetch Candles & Analyze Signal
+        async function analyzeMarketSignal(tfKey) {
+            if (!API_KEY || API_KEY === "YOUR_API_KEY") {
+                throw new Error("กรุณาใส่ Twelve Data API Key ในตัวแปร API_KEY ที่บรรทัดแรกใต้ <script> ก่อนใช้งาน");
+            }
+
+            const interval = TIMEFRAME_MAP[tfKey] || "1min";
+            const url = `${BASE_URL}/time_series?symbol=XAU/USD&interval=${interval}&outputsize=100&order=ASC&apikey=${API_KEY}`;
+
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (!data.values || !Array.isArray(data.values)) {
+                throw new Error(data.message || "ไม่สามารถดึงข้อมูลแท่งเทียนจาก Twelve Data API ได้");
+            }
+
+            const candles = data.values.map(item => ({
+                open: parseFloat(item.open),
+                high: parseFloat(item.high),
+                low: parseFloat(item.low),
+                close: parseFloat(item.close)
+            }));
+
+            const closes = candles.map(c => c.close);
+            const ema9Series = calculateEMA(closes, 9);
+            const ema21Series = calculateEMA(closes, 21);
+
+            const len = closes.length;
+            const currentPrice = closes[len - 1];
+            const ema9 = ema9Series[len - 1];
+            const ema21 = ema21Series[len - 1];
+            const prevEma9 = ema9Series[len - 2];
+            const prevEma21 = ema21Series[len - 2];
+            const rsi = calculateRSI(closes, 14);
+            const atr = calculateATR(candles, 14);
+
+            let bullishScore = 0;
+            let bearishScore = 0;
+            const reasons = [];
+
+            // เงื่อนไขที่ 1: ทิศทาง EMA 9 และ EMA 21
+            if (ema9 > ema21) {
+                bullishScore += 35;
+                if (prevEma9 <= prevEma21) {
+                    bullishScore += 15;
+                    reasons.push("เกิดสัญญาณ Golden Cross (EMA 9 ตัดขึ้นเหนือ EMA 21)");
+                } else {
+                    reasons.push(`แนวโน้มขาขึ้นระยะสั้น EMA 9 (${ema9.toFixed(2)}) ยืนเหนือ EMA 21 (${ema21.toFixed(2)})`);
+                }
+            } else {
+                bearishScore += 35;
+                if (prevEma9 >= prevEma21) {
+                    bearishScore += 15;
+                    reasons.push("เกิดสัญญาณ Death Cross (EMA 9 ตัดลงใต้ EMA 21)");
+                } else {
+                    reasons.push(`แนวโน้มขาลงระยะสั้น EMA 9 (${ema9.toFixed(2)}) อยู่ต่ำกว่า EMA 21 (${ema21.toFixed(2)})`);
+                }
+            }
+
+            // เงื่อนไขที่ 2: ตำแหน่งราคาเทียบกับ EMA 9
+            if (currentPrice > ema9) {
+                bullishScore += 20;
+                reasons.push("ราคาปัจจุบันยืนเหนือเส้นแนวรับไดนามิก EMA 9");
+            } else {
+                bearishScore += 20;
+                reasons.push("ราคาปัจจุบันถูกกดดันอยู่ใต้เส้นแนวต้าน EMA 9");
+            }
+
+            // เงื่อนไขที่ 3: โมเมนตัมจาก RSI (14)
+            if (rsi >= 52 && rsi <= 72) {
+                bullishScore += 25;
+                reasons.push(`RSI (${rsi.toFixed(1)}) มีแรงซื้อสนับสนุนต่อเนื่องและยังไม่เข้าเขต Overbought รุนแรง`);
+            } else if (rsi < 32) {
+                bullishScore += 20;
+                reasons.push(`RSI (${rsi.toFixed(1)}) อยู่ในโซน Oversold มีโอกาสดีดตัวกลับระยะสั้น`);
+            } else if (rsi >= 28 && rsi <= 48) {
+                bearishScore += 25;
+                reasons.push(`RSI (${rsi.toFixed(1)}) มีแรงขายคุมตลาดต่อเนื่อง`);
+            } else if (rsi > 68) {
+                bearishScore += 20;
+                reasons.push(`RSI (${rsi.toFixed(1)}) เข้าเขต Overbought เสี่ยงต่อการย่อตัว`);
+            } else {
+                reasons.push(`RSI (${rsi.toFixed(1)}) เคลื่อนไหวในกรอบสมดุล`);
+            }
+
+            const direction = bullishScore >= bearishScore ? "BUY" : "SELL";
+            const rawConfidence = direction === "BUY" ? bullishScore : bearishScore;
+            const confidence = Math.min(94, Math.max(62, rawConfidence + 12));
+
+            // คำนวณ SL / TP1 / TP2 จาก ATR (14) และระยะขั้นต่ำ
+            const atrSlDistance = atr * 1.5;
+            const minSlPriceDiff = MIN_SL_POINTS[tfKey] / 100.0;
+            const slDistance = Math.max(atrSlDistance, minSlPriceDiff);
+
+            const entryPrice = parseFloat(currentPrice.toFixed(2));
+            let slPrice, tp1Price, tp2Price;
+
+            if (direction === "BUY") {
+                slPrice = parseFloat((entryPrice - slDistance).toFixed(2));
+                tp1Price = parseFloat((entryPrice + slDistance).toFixed(2));
+                tp2Price = parseFloat((entryPrice + (slDistance * 2)).toFixed(2));
+            } else {
+                slPrice = parseFloat((entryPrice + slDistance).toFixed(2));
+                tp1Price = parseFloat((entryPrice - slDistance).toFixed(2));
+                tp2Price = parseFloat((entryPrice - (slDistance * 2)).toFixed(2));
+            }
+
+            return {
+                timeframe: tfKey.toUpperCase(),
+                direction: direction,
+                entry: entryPrice.toFixed(2),
+                sl: slPrice.toFixed(2),
+                tp1: tp1Price.toFixed(2),
+                tp2: tp2Price.toFixed(2),
+                sl_points: Math.round(Math.abs(entryPrice - slPrice) * 100),
+                tp1_points: Math.round(Math.abs(tp1Price - entryPrice) * 100),
+                tp2_points: Math.round(Math.abs(tp2Price - entryPrice) * 100),
+                confidence: confidence,
+                reasons: reasons.slice(0, 3)
+            };
+        }
+
+        // 6. Timeframe Selection
+        document.querySelectorAll('.tf-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+                document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedTf = btn.dataset.tf;
+            });
+        });
+
+        // 7. Step Animation Helper
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        function resetSteps() {
+            for (let i = 1; i <= 4; i++) {
+                const el = document.getElementById(`step-${i}`);
+                el.classList.remove('active', 'done');
+            }
+        }
+
+        async function runStepAnimation(analysisPromise) {
+            const stepsContainer = document.getElementById('stepsContainer');
+            stepsContainer.classList.add('visible');
+            resetSteps();
+
+            // Step 1: MARKET
+            document.getElementById('step-1').classList.add('active');
+            await sleep(400);
+            document.getElementById('step-1').classList.replace('active', 'done');
+
+            // Step 2: INDICATORS
+            document.getElementById('step-2').classList.add('active');
+            await sleep(400);
+            document.getElementById('step-2').classList.replace('active', 'done');
+
+            // Step 3: ANALYSIS
+            document.getElementById('step-3').classList.add('active');
+            const resultData = await analysisPromise;
+            await sleep(300);
+            document.getElementById('step-3').classList.replace('active', 'done');
+
+            // Step 4: SIGNAL
+            document.getElementById('step-4').classList.add('active');
+            await sleep(300);
+            document.getElementById('step-4').classList.replace('active', 'done');
+
+            return resultData;
+        }
+
+        // 8. Execute Scan
+        document.getElementById('scanBtn').addEventListener('click', async () => {
+            const scanBtn = document.getElementById('scanBtn');
+            const scanRing = document.getElementById('scanRing');
+            const resultCard = document.getElementById('resultCard');
+            const errorBox = document.getElementById('errorBox');
+
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+            scanBtn.disabled = true;
+            scanRing.classList.add('scanning');
+            resultCard.classList.remove('visible');
+            errorBox.style.display = 'none';
+
+            try {
+                const analysisPromise = analyzeMarketSignal(selectedTf);
+                const data = await runStepAnimation(analysisPromise);
+
+                // Update Live Price
+                document.getElementById('livePrice').textContent = data.entry;
+
+                // Populate Result Card
+                const badge = document.getElementById('signalBadge');
+                badge.textContent = data.direction;
+                badge.className = `signal-badge ${data.direction}`;
+
+                document.getElementById('resTimeframe').textContent = data.timeframe;
+                document.getElementById('resConfidence').textContent = `${data.confidence}%`;
+                document.getElementById('resEntry').textContent = data.entry;
+                document.getElementById('resSl').textContent = data.sl;
+                document.getElementById('resTp1').textContent = data.tp1;
+                document.getElementById('resTp2').textContent = data.tp2;
+
+                document.getElementById('resSlPts').textContent = `-${data.sl_points} pts`;
+                document.getElementById('resTp1Pts').textContent = `+${data.tp1_points} pts`;
+                document.getElementById('resTp2Pts').textContent = `+${data.tp2_points} pts`;
+
+                const reasonsList = document.getElementById('reasonsList');
+                reasonsList.innerHTML = '';
+                data.reasons.forEach(reason => {
+                    const li = document.createElement('li');
+                    li.textContent = reason;
+                    reasonsList.appendChild(li);
+                });
+
+                resultCard.classList.add('visible');
+
+                // Update Session Stats
+                sessionStats.total += 1;
+                if (data.direction === 'BUY') sessionStats.buy += 1;
+                if (data.direction === 'SELL') sessionStats.sell += 1;
+
+                document.getElementById('statTotal').textContent = sessionStats.total;
+                document.getElementById('statBuy').textContent = sessionStats.buy;
+                document.getElementById('statSell').textContent = sessionStats.sell;
+
+                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+
+            } catch (err) {
+                errorBox.textContent = err.message;
+                errorBox.style.display = 'block';
+                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+            } finally {
+                scanBtn.disabled = false;
+                scanRing.classList.remove('scanning');
+            }
+        });
+    </script>
 </body>
 </html>
